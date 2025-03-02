@@ -223,6 +223,31 @@ class Achievement {
     _debugPrint('업적 초기화됨');
   }
   
+  /// copyWith 메서드 추가
+  Achievement copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? condition,
+    bool? isUnlocked,
+    int? experienceReward,
+    DateTime? unlockedAt,
+    String? unlockedById,
+    AchievementTier? tier,
+  }) {
+    return Achievement(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      condition: condition ?? this.condition,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      experienceReward: experienceReward ?? this.experienceReward,
+      unlockedAt: unlockedAt ?? this.unlockedAt,
+      unlockedById: unlockedById ?? this.unlockedById,
+      tier: tier ?? this.tier,
+    );
+  }
+  
   /// JSON으로 변환
   Map<String, dynamic> toJson() {
     return {

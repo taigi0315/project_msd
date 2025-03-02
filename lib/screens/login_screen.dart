@@ -4,406 +4,408 @@ import '../theme/app_theme.dart';
 import '../services/mock_data_service.dart';
 import 'character_creation_screen.dart';
 import 'clan_dashboard_screen.dart';
+import '../services/game_effects_service.dart';
+import 'dart:math';
 
-/// 로그인 화면
-/// 사용자가 앱에 로그인하거나 회원가입할 수 있는 화면입니다.
-/// 파이어베이스 연동 전까지는 임시 인증으로 구현합니다.
+/// Login Screen of EPIC ADVENTURES!
+/// This magical gateway allows users to log in or sign up for the app.
+/// With awesome particles and animations, it's the first step in your legendary journey!
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
-  // 폼 키
-  final _formKey = GlobalKey<FormState>();
-  
-  // 텍스트 컨트롤러
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  
-  // 애니메이션 컨트롤러
-  late AnimationController _controller;
-  late Animation<double> _fadeInAnimation;
-  
-  // 로그인 상태
+  final TextEditingController _emailController = TextEditingController();
   bool _isLoading = false;
-  bool _isPasswordVisible = false;
+  bool _emailValid = false;
   String? _errorMessage;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
   
-  // 디버깅 출력
-  void _debugPrint(String message) {
-    // ignore: avoid_print
-    print('🔐 LoginScreen: $message');
-  }
+  // Fun particle effects for login button
+  final List<Particle> _particles = [];
+  final Random _random = Random();
   
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
     
-    // 개발용 기본값
+    // Add a demo account email for easy testing
     _emailController.text = 'choi@familyquest.com';
-    _passwordController.text = 'password123';
+    _validateEmail(_emailController.text);
     
-    // 애니메이션 설정
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    // Setup animations
+    _animationController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 1200),
     );
     
-    // 페이드인 애니메이션
-    _fadeInAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
     );
     
-    _controller.forward();
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 0.8, curve: Curves.elasticOut),
+      ),
+    );
+    
+    // Start the entrance animation
+    _animationController.forward();
+    
+    // Create particle effects
+    _generateParticles();
   }
   
+  void _generateParticles() {
+    for (int i = 0; i < 15; i++) {
+      _particles.add(
+        Particle(
+          position: Offset(_random.nextDouble(), _random.nextDouble()),
+          speed: 0.001 + _random.nextDouble() * 0.002,
+          color: AppTheme.getRandomColor().withOpacity(0.7),
+          size: 5 + _random.nextDouble() * 8,
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
-    _controller.dispose();
-    _debugPrint('리소스 해제됨');
+    _animationController.dispose();
     super.dispose();
   }
-  
-  /// 로그인 처리
+
+  void _validateEmail(String value) {
+    // Simple email validation - improve for production
+    setState(() {
+      _emailValid = value.isNotEmpty && value.contains('@');
+      _errorMessage = null;
+    });
+  }
+
   Future<void> _login() async {
-    _debugPrint('로그인 시도: ${_emailController.text}');
-    
-    // 폼 검증
-    if (!_formKey.currentState!.validate()) {
-      _debugPrint('폼 검증 실패');
+    if (!_emailValid) {
+      setState(() {
+        _errorMessage = 'Please enter a valid email address!';
+      });
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
-      // 임시 로그인 처리 (Firebase 대체)
-      await Future.delayed(const Duration(seconds: 1));
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 1500));
       
-      // 테스트 이메일/비밀번호 확인
-      if (_emailController.text == 'choi@familyquest.com' && 
-          _passwordController.text == 'password123') {
-        
-        _debugPrint('로그인 성공');
-        
-        // 임시 사용자 ID 생성
-        final userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
-        
-        // 데이터 서비스 가져오기
-        final dataService = Provider.of<MockDataService>(context, listen: false);
-        
-        // 사용자 캐릭터 조회
-        final character = dataService.getCharacterByUserId(userId);
-        
-        // 샘플 데이터 생성
-        if (character == null) {
-          await dataService.createSampleData();
-          _debugPrint('샘플 데이터 생성됨');
-        }
-        
-        // 캐릭터가 있으면 대시보드로, 없으면 캐릭터 생성 화면으로
-        if (!mounted) return;
-        
-        if (character == null) {
-          // 캐릭터 생성 화면으로 이동
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => CharacterCreationScreen(userId: userId),
-            ),
-          );
-        } else {
-          // 클랜 대시보드로 이동
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => ClanDashboardScreen(character: character),
-            ),
-          );
-        }
+      final mockDataService = Provider.of<MockDataService>(context, listen: false);
+      final user = await mockDataService.login(_emailController.text);
+      
+      // Play sound effect
+      GameEffectsService().playSound(GameSound.success);
+
+      if (!mounted) return;
+
+      if (user != null) {
+        // Existing user found, navigate to dashboard
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => 
+              ClanDashboardScreen(character: user),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
       } else {
-        _debugPrint('로그인 실패: 잘못된 이메일 또는 비밀번호');
-        setState(() {
-          _errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
-        });
+        // New user, navigate to character creation
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => 
+              CharacterCreationScreen(userId: 'new_user_${DateTime.now().millisecondsSinceEpoch}'),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
       }
     } catch (e) {
-      _debugPrint('로그인 오류: $e');
-      setState(() {
-        _errorMessage = '로그인 처리 중 오류가 발생했습니다.';
-      });
-    } finally {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
+        _errorMessage = 'Oops! Login failed: $e';
       });
+      
+      // Play error sound
+      GameEffectsService().playSound(GameSound.error);
     }
-  }
-  
-  /// 비밀번호 가시성 전환
-  void _togglePasswordVisibility() {
-    setState(() {
-      _isPasswordVisible = !_isPasswordVisible;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    _debugPrint('빌드 중...');
-    
-    // 화면 크기 계산
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
-    
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: FadeTransition(
-        opacity: _fadeInAnimation,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(24.0),
-              height: screenHeight - MediaQuery.of(context).padding.top - 24,
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: screenHeight * 0.05),
-                    
-                    // 상단 로고 및 제목
-                    Center(
-                      child: Icon(
-                        Icons.shield,
-                        size: 80,
-                        color: AppTheme.primaryColor,
+      body: Stack(
+        children: [
+          // Background particles
+          CustomPaint(
+            painter: ParticlePainter(_particles),
+            child: Container(width: double.infinity, height: double.infinity),
+          ),
+          
+          // Gradient overlay
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppTheme.primaryColor.withOpacity(0.15),
+                  AppTheme.backgroundColor.withOpacity(0.1),
+                ],
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32.0),
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: child,
                       ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    Text(
-                      'Family Choi Chronicles',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppTheme.primaryColor,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    Text(
-                      '모험의 세계로 로그인하세요',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    
-                    SizedBox(height: screenHeight * 0.08),
-                    
-                    // 에러 메시지
-                    if (_errorMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.only(bottom: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.shade300),
-                        ),
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade800),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    
-                    // 이메일 필드
-                    _buildTextField(
-                      controller: _emailController,
-                      hintText: '이메일',
-                      labelText: '이메일 주소',
-                      prefixIcon: Icons.email,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '이메일을 입력해주세요';
-                        }
-                        if (!value.contains('@')) {
-                          return '유효한 이메일 주소를 입력해주세요';
-                        }
-                        return null;
-                      },
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // 비밀번호 필드
-                    _buildTextField(
-                      controller: _passwordController,
-                      hintText: '비밀번호',
-                      labelText: '비밀번호',
-                      prefixIcon: Icons.lock,
-                      obscureText: !_isPasswordVisible,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                          color: AppTheme.primaryColor,
-                        ),
-                        onPressed: _togglePasswordVisibility,
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '비밀번호를 입력해주세요';
-                        }
-                        if (value.length < 6) {
-                          return '비밀번호는 6자 이상이어야 합니다';
-                        }
-                        return null;
-                      },
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // 비밀번호 찾기
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          _debugPrint('비밀번호 찾기 클릭');
-                        },
-                        child: Text(
-                          '비밀번호를 잊으셨나요?',
-                          style: TextStyle(
-                            color: AppTheme.accentColor,
-                            fontWeight: FontWeight.bold,
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // App icon/logo
+                      Hero(
+                        tag: 'app_logo',
+                        child: CircleAvatar(
+                          radius: 70,
+                          backgroundColor: AppTheme.secondaryColor.withOpacity(0.8),
+                          child: Icon(
+                            Icons.account_balance,
+                            size: 70,
+                            color: AppTheme.backgroundColor,
                           ),
                         ),
                       ),
-                    ),
-                    
-                    SizedBox(height: screenHeight * 0.05),
-                    
-                    // 로그인 버튼
-                    _buildStyledButton(
-                      text: '모험 시작하기',
-                      onPressed: _isLoading ? null : _login,
-                      isLoading: _isLoading,
-                      primaryColor: AppTheme.primaryColor,
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    // 회원가입 안내
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('계정이 없으신가요?', style: Theme.of(context).textTheme.bodyMedium),
-                        TextButton(
-                          onPressed: () {
-                            _debugPrint('회원가입 클릭');
-                            // TODO: 회원가입 화면으로 이동
-                          },
+                      const SizedBox(height: 32),
+                      
+                      // App title
+                      Text(
+                        'Family Choi Chronicles',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // App subtitle
+                      Text(
+                        'Turn family history into an epic adventure!',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textColor.withOpacity(0.7),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 60),
+                      
+                      // Email field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: _validateEmail,
+                        decoration: InputDecoration(
+                          labelText: 'Email Address',
+                          hintText: 'Enter your email to begin your quest',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                            borderSide: BorderSide(
+                              color: AppTheme.primaryColor.withOpacity(0.5),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                            borderSide: BorderSide(
+                              color: AppTheme.primaryColor,
+                              width: 2.0,
+                            ),
+                          ),
+                          fillColor: AppTheme.cardColor.withOpacity(0.9),
+                          filled: true,
+                        ),
+                        style: TextStyle(color: AppTheme.textColor),
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      // Error message
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
                           child: Text(
-                            '회원가입',
+                            _errorMessage!,
                             style: TextStyle(
-                              color: AppTheme.secondaryColor,
-                              fontWeight: FontWeight.bold,
+                              color: AppTheme.errorColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    
-                    const Spacer(),
-                    
-                    // 푸터 텍스트
-                    Text(
-                      '© 2023 Family Choi Chronicles',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+                      const SizedBox(height: 24),
+                      
+                      // Login button
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _login,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: AppTheme.cardColor,
+                          backgroundColor: _emailValid 
+                            ? AppTheme.primaryColor
+                            : AppTheme.primaryColor.withOpacity(0.6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32.0,
+                            vertical: 16.0,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          elevation: 5,
+                        ),
+                        child: Container(
+                          width: 200,
+                          child: Center(
+                            child: _isLoading
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: AppTheme.cardColor,
+                                        strokeWidth: 3.0,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Text(
+                                      'Starting Quest...',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.play_arrow, size: 28),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Begin Adventure!',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    
-                    const SizedBox(height: 12),
-                  ],
+                      const SizedBox(height: 24),
+                      
+                      // Help text
+                      Text(
+                        'First time? Enter your email above to create a new character!',
+                        style: TextStyle(
+                          color: AppTheme.textColor.withOpacity(0.7),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
+  }
+}
+
+class Particle {
+  Offset position;
+  double speed;
+  Color color;
+  double size;
+  
+  Particle({
+    required this.position,
+    required this.speed,
+    required this.color,
+    required this.size,
+  });
+}
+
+class ParticlePainter extends CustomPainter {
+  final List<Particle> particles;
+  
+  ParticlePainter(this.particles);
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (var particle in particles) {
+      // Update position
+      particle.position = Offset(
+        particle.position.dx,
+        (particle.position.dy + particle.speed) % 1.0,
+      );
+      
+      // Draw particle
+      final Paint paint = Paint()
+        ..color = particle.color
+        ..style = PaintingStyle.fill;
+      
+      canvas.drawCircle(
+        Offset(
+          particle.position.dx * size.width,
+          particle.position.dy * size.height,
+        ),
+        particle.size,
+        paint,
+      );
+    }
   }
   
-  /// 텍스트 필드 위젯 생성
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required String labelText,
-    required IconData prefixIcon,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: labelText,
-        prefixIcon: Icon(prefixIcon, color: AppTheme.primaryColor),
-        suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
-        ),
-      ),
-      validator: validator,
-    );
-  }
-  
-  /// 스타일된 버튼 생성
-  Widget _buildStyledButton({
-    required String text,
-    required VoidCallback? onPressed,
-    required bool isLoading,
-    required Color primaryColor,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: isLoading
-          ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                strokeWidth: 2.5,
-              ),
-            )
-          : Text(
-              text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-    );
-  }
+  @override
+  bool shouldRepaint(ParticlePainter oldDelegate) => true;
 } 

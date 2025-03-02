@@ -127,8 +127,8 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
       await _dataService.addClan(newClan);
       
       // 캐릭터에 클랜 연결
-      widget.character.joinClan(newClan.id);
-      await _dataService.updateCharacter(widget.character);
+      final updatedCharacter = widget.character.joinClan(newClan.id);
+      await _dataService.updateCharacter(updatedCharacter);
       
       _debugPrint('클랜 생성 완료: ${newClan.name} (ID: ${newClan.id})');
       
@@ -136,7 +136,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => ClanDashboardScreen(character: widget.character),
+          builder: (context) => ClanDashboardScreen(character: updatedCharacter),
         ),
       );
     } catch (e) {

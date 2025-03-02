@@ -5,6 +5,7 @@ import '../services/mock_data_service.dart';
 import '../services/mock_ai_service.dart';
 import '../theme/app_theme.dart';
 import 'clan_selection_screen.dart';
+import 'character_questionnaire_screen.dart';
 
 /// 캐릭터 생성 화면
 /// 사용자가 자신의 캐릭터를 생성하는 화면입니다.
@@ -232,6 +233,44 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
               ),
             ),
             
+            // AI 설문 옵션 (전통적 방식 대신 설문으로 클래스 선택)
+            if (_currentStep == 1)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CharacterQuestionnaireScreen(
+                          userId: widget.userId,
+                          onCharacterGenerated: (Character character) {
+                            // 생성된 캐릭터 정보로 업데이트
+                            setState(() {
+                              _nameController.text = character.name;
+                              _selectedSpecialty = character.specialty;
+                              _battleCry = character.battleCry;
+                              _currentStep = 2; // 바로 전투 구호 단계로 이동
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.psychology, color: AppTheme.secondaryColor),
+                  label: const Text(
+                    'AI 설문으로 역할 추천받기',
+                    style: TextStyle(
+                      color: AppTheme.secondaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppTheme.secondaryColor),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  ),
+                ),
+              ),
+            
             // 하단 버튼
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -399,8 +438,40 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
           '당신의 성격과 능력을 가장 잘 반영하는 역할을 선택하세요.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
+
+        const SizedBox(height: 16),
         
-        const SizedBox(height: 24),
+        Card(
+          color: Colors.amber[50],
+          margin: const EdgeInsets.only(bottom: 24),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.lightbulb, color: AppTheme.secondaryColor),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '역할을 결정하기 어렵나요?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.secondaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '페이지 하단의 "AI 설문으로 역할 추천받기" 버튼을 눌러 설문에 답하면 AI가 당신에게 맞는 역할을 추천해 드립니다.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
         
         // 역할 선택 카드 목록
         ...CharacterSpecialty.values.map((specialty) => 

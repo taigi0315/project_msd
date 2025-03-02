@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/clan.dart';
 import '../models/character.dart';
 import '../models/project.dart';
+import 'package:flutter/material.dart';
+import 'package:family_choi_app/services/game_effects_service.dart';
 
 /// Firebase를 대신하여, 로컬 저장소를 사용하는 모의 데이터 서비스
 /// 실제 애플리케이션에서는 Firebase로 교체될 예정입니다.
@@ -410,7 +412,7 @@ class MockDataService {
       founderCharacterId: character.id
     );
     
-    character.joinClan(clan.id);
+    final updatedCharacter = character.joinClan(clan.id);
     
     // 프로젝트 생성
     final project = Project(
@@ -483,7 +485,7 @@ class MockDataService {
     project.addAchievement(achievement3);
     
     // 데이터 저장
-    await addCharacter(character);
+    await addCharacter(updatedCharacter);
     await addClan(clan);
     await addProject(project);
     
@@ -503,8 +505,10 @@ class MockDataService {
   }
   
   /// 캐릭터 ID로 캐릭터 조회
-  Character? getCharacterById(String characterId) {
-    return getCharacter(characterId);
+  Character? getCharacterById(dynamic characterId) {
+    // ID가 int인 경우 String으로 변환
+    final String id = characterId.toString();
+    return getCharacter(id);
   }
   
   /// 캐릭터 데이터 내부 업데이트 메서드
@@ -531,5 +535,61 @@ class MockDataService {
     await _prefs.remove('currentUserId');
     
     _debugPrint('로그아웃 완료');
+  }
+  
+  /// 캐릭터에 경험치 추가
+  Future<bool> gainCharacterExperience(String characterId, int amount, {BuildContext? context}) async {
+    _debugPrint('캐릭터 ID $characterId에 경험치 $amount 추가 시도');
+    
+    if (amount <= 0) {
+      _debugPrint('유효하지 않은 경험치 값: $amount');
+      return false;
+    }
+    
+    // 캐릭터 찾기
+    final Character? character = await getCharacter(characterId);
+    if (character == null) {
+      _debugPrint('캐릭터를 찾을 수 없음: $characterId');
+      return false;
+    }
+    
+    // 경험치 추가 및 레벨업 확인
+    final bool didLevelUp = await character.gainExperience(amount);
+    
+    // 캐릭터 저장
+    await _saveCharacter(character);
+    
+    _debugPrint('캐릭터 ID $characterId에 경험치 $amount 추가 완료. 레벨업: $didLevelUp');
+    return didLevelUp;
+  }
+  
+  /// 캐릭터 저장
+  Future<void> _saveCharacter(Character character) async {
+    _debugPrint('캐릭터 저장: ${character.name}');
+    _characters[character.id] = character;
+    _characterStreamController.add(_characters);
+    await _saveCharacters();
+  }
+  
+  /// 사용자 로그인
+  Future<dynamic> login(String email) async {
+    _debugPrint('로그인 시도: $email');
+    
+    // 이메일로 사용자 찾기 (실제 Firebase 대신 모의 구현)
+    await Future.delayed(Duration(milliseconds: 500)); // 네트워크 지연 시뮬레이션
+    
+    // 기존 캐릭터 중에서 이메일과 일치하는 것이 있는지 확인
+    try {
+      final existingCharacter = _characters.values.firstWhere(
+        (character) => character.email == email,
+      );
+      
+      _debugPrint('기존 사용자 발견: ${existingCharacter.name}');
+      return existingCharacter;
+    } catch (e) {
+      // 일치하는 캐릭터가 없을 경우
+      _debugPrint('새 사용자입니다. 캐릭터 생성이 필요합니다.');
+      return null;
+    }
   }
 } 

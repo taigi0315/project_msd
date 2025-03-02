@@ -122,7 +122,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
         _debugPrint('이미 클랜에 가입됨: ${clan.name}');
         
         // 대시보드로 이동
-        _navigateToDashboard(clan);
+        _navigateToDashboard(clan, widget.character);
         return;
       }
       
@@ -131,14 +131,14 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
       await dataService.updateClan(clan);
       
       // 캐릭터에 클랜 연결
-      widget.character.joinClan(clan.id);
-      await dataService.updateCharacter(widget.character);
+      final updatedCharacter = widget.character.joinClan(clan.id);
+      await dataService.updateCharacter(updatedCharacter);
       
       _debugPrint('클랜 가입 완료: ${clan.name}');
       
       // 대시보드로 이동
       if (!mounted) return;
-      _navigateToDashboard(clan);
+      _navigateToDashboard(clan, updatedCharacter);
     } catch (e) {
       _debugPrint('클랜 참여 오류: $e');
       
@@ -170,7 +170,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
         _debugPrint('이미 클랜에 가입됨: ${clan.name}');
         
         // 대시보드로 이동
-        _navigateToDashboard(clan);
+        _navigateToDashboard(clan, widget.character);
         return;
       }
       
@@ -179,14 +179,14 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
       await dataService.updateClan(clan);
       
       // 캐릭터에 클랜 연결
-      widget.character.joinClan(clan.id);
-      await dataService.updateCharacter(widget.character);
+      final updatedCharacter = widget.character.joinClan(clan.id);
+      await dataService.updateCharacter(updatedCharacter);
       
       _debugPrint('클랜 가입 완료: ${clan.name}');
       
       // 대시보드로 이동
       if (!mounted) return;
-      _navigateToDashboard(clan);
+      _navigateToDashboard(clan, updatedCharacter);
     } catch (e) {
       _debugPrint('클랜 참여 오류: $e');
       
@@ -215,10 +215,10 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
   }
   
   /// 클랜 대시보드로 이동
-  void _navigateToDashboard(Clan clan) {
+  void _navigateToDashboard(Clan clan, Character updatedCharacter) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => ClanDashboardScreen(character: widget.character),
+        builder: (context) => ClanDashboardScreen(character: updatedCharacter),
       ),
     );
   }
@@ -465,7 +465,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
               
               // 참여 버튼
               ElevatedButton(
-                onPressed: isAlreadyMember ? () => _navigateToDashboard(clan) : () => _joinClan(clan),
+                onPressed: isAlreadyMember ? () => _navigateToDashboard(clan, widget.character) : () => _joinClan(clan),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isAlreadyMember ? AppTheme.secondaryColor : AppTheme.primaryColor,
                   foregroundColor: Colors.white,

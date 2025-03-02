@@ -9,22 +9,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:family_choi_app/main.dart';
+import 'package:family_choi_app/screens/splash_screen.dart';
+import 'package:family_choi_app/theme/app_theme.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('앱 시작 화면이 성공적으로 로드되는지 확인', (WidgetTester tester) async {
+    // 앱을 빌드하고 프레임 트리거
+    await tester.pumpWidget(const FamilyChoiApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 스플래시 화면이 로드되었는지 확인
+    expect(find.byType(SplashScreen), findsOneWidget);
+    
+    // 앱 이름이 표시되는지 확인 (애니메이션에 따라 실패할 수 있음)
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Family Choi Chronicles'), findsOneWidget);
+    
+    // 로딩 인디케이터가 표시되는지 확인
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+  
+  testWidgets('앱 테마가 올바르게 적용되는지 확인', (WidgetTester tester) async {
+    // 앱을 빌드하고 프레임 트리거
+    await tester.pumpWidget(const FamilyChoiApp());
+    
+    // 테마 색상이 올바르게 적용되었는지 확인
+    final scaffoldWidget = find.byType(Scaffold).evaluate().first.widget as Scaffold;
+    expect(scaffoldWidget.backgroundColor, equals(AppTheme.backgroundColor));
   });
 }

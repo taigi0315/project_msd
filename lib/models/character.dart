@@ -1,377 +1,294 @@
 import 'package:uuid/uuid.dart';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:family_choi_app/services/game_effects_service.dart';
+import 'skill.dart';
 
-/// 캐릭터의 전문 역할을 나타내는 열거형
+/// Character specialty roles in our epic RPG adventure!
 enum CharacterSpecialty {
-  /// 리더십이 뛰어난 지도자
-  leader('지도자', '클랜을 이끌고 방향성을 제시합니다'),
+  /// Awesome leader with epic leadership skills
+  leader('Leader', 'Leads the clan with epic boss vibes!'),
   
-  /// 전투에 특화된 전사
-  warrior('전사', '어려운 과제를 정면으로 맞서 해결합니다'),
+  /// Combat-specialized warrior ready to slay problems
+  warrior('Warrior', 'Tackles tough quests head-on like a boss!'),
   
-  /// 마법을 다루는 마법사
-  mage('마법사', '창의적인 방법으로 문제를 해결합니다'),
+  /// Spell-slinging wizard with creative solutions
+  mage('Mage', 'Solves problems with big brain energy!'),
   
-  /// 치유를 담당하는 힐러
-  healer('힐러', '팀의 사기를 높이고 문제를 중재합니다'),
+  /// Life-saving healer keeping the squad healthy
+  healer('Healer', 'Boosts team spirit and settles drama!'),
   
-  /// 정찰과 탐색을 담당하는 스카우트
-  scout('정찰병', '정보를 수집하고 미래를 예측합니다'),
+  /// Sneaky scout gathering all the intel
+  scout('Scout', 'Collects intel and predicts the future like a psychic!'),
   
-  /// 레인저
-  ranger('레인저', '야생을 탐험하고 정보를 수집합니다'),
+  /// Wild explorer finding all the secrets
+  ranger('Ranger', 'Explores the wilderness and gathers juicy info!'),
   
-  /// 도적
-  rogue('도적', '전투 중에 무작정 도망치거나 적을 속이는 기술을 사용합니다'),
+  /// Sneaky sneaky stealth master
+  rogue('Rogue', 'Uses 200 IQ moves to escape battles or bamboozle enemies!'),
   
-  /// 성직자
-  cleric('성직자', '팀원들을 치유하고 성스러운 힘을 부여합니다');
+  /// Holy support with divine blessings
+  cleric('Cleric', 'Heals teammates and drops holy buffs on the squad!');
 
-  /// 역할명
+  /// Name to display in the UI
   final String displayName;
   
-  /// 역할 설명
+  /// What this awesome role actually does
   final String description;
   
   const CharacterSpecialty(this.displayName, this.description);
 }
 
-/// 캐릭터의 스킬 클래스
-class Skill {
-  /// 스킬 이름
-  final String name;
+/// Skill types for our epic heroes
+enum SkillType {
+  /// Battle skills for getting EPIC VICTORIES
+  combat,
   
-  /// 스킬 설명
-  final String description;
+  /// Big brain skills for solving puzzles
+  knowledge,
   
-  /// 스킬 레벨
-  int level;
+  /// Talk-no-jutsu for convincing others
+  social,
   
-  /// 다음 레벨까지 필요한 경험치
-  int experienceToNextLevel;
-
-  /// 디버깅을 위한 출력
-  void _debugPrint(String message) {
-    // ignore: avoid_print
-    print('⚔️ Skill ($name): $message');
-  }
-  
-  /// 스킬 생성자
-  Skill({
-    required this.name,
-    required this.description,
-    this.level = 1,
-    this.experienceToNextLevel = 100,
-  }) {
-    _debugPrint('새로운 스킬 생성: $name (Lv.$level)');
-  }
-  
-  /// 경험치 획득
-  void gainExperience(int amount) {
-    if (amount <= 0) {
-      _debugPrint('유효하지 않은 경험치 값: $amount');
-      return;
-    }
-    
-    _debugPrint('경험치 획득: +$amount');
-    
-    // 경험치 적용 및 레벨업 확인
-    if (amount >= experienceToNextLevel) {
-      int remainingExp = amount - experienceToNextLevel;
-      levelUp();
-      
-      // 남은 경험치 처리
-      if (remainingExp > 0) {
-        gainExperience(remainingExp);
-      }
-    } else {
-      experienceToNextLevel -= amount;
-      _debugPrint('다음 레벨까지 필요 경험치: $experienceToNextLevel');
-    }
-  }
-  
-  /// 레벨업
-  void levelUp() {
-    level++;
-    // 레벨이 올라갈수록 다음 레벨까지 필요한 경험치 증가
-    experienceToNextLevel = level * 100;
-    _debugPrint('레벨업! 현재 레벨: $level, 다음 레벨까지 필요 경험치: $experienceToNextLevel');
-  }
-  
-  /// JSON으로 변환
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description,
-      'level': level,
-      'experienceToNextLevel': experienceToNextLevel,
-    };
-  }
-  
-  /// JSON에서 변환
-  factory Skill.fromJson(Map<String, dynamic> json) {
-    return Skill(
-      name: json['name'] as String,
-      description: json['description'] as String,
-      level: json['level'] as int,
-      experienceToNextLevel: json['experienceToNextLevel'] as int,
-    );
-  }
+  /// Not dying in the wilderness skills
+  survival,
 }
 
-/// 캐릭터 모델 클래스
-/// 사용자는 게임 내에서 고유한 캐릭터를 가지며, 이 캐릭터를 통해 활동합니다.
+/// RPG-style Character in our epic Family Quest app!
+/// Each character represents a family member with special skills and stats.
+/// Characters can join clans, complete missions, and level up!
 class Character {
-  /// 캐릭터의 고유 ID
   final String id;
-  
-  /// 캐릭터 이름
-  String name;
-  
-  /// 사용자 ID (Firebase Auth ID와 연결될 예정)
+  final String name;
   final String userId;
-  
-  /// 이메일 주소
   final String email;
-  
-  /// 캐릭터의 전문 역할
-  CharacterSpecialty specialty;
-  
-  /// 캐릭터의 전투 구호
+  final CharacterSpecialty specialty;
   String battleCry;
-  
-  /// 캐릭터의 스킬 목록
-  List<Skill> skills;
-  
-  /// 캐릭터의 레벨
   int level;
-  
-  /// 전체 경험치
-  int totalExperience;
-  
-  /// 다음 레벨까지 필요한 경험치
-  int experienceToNextLevel;
-
-  /// 캐릭터가 속한 클랜 ID
+  int experience;
   String? clanId;
+  Color color;
+  List<String> skillIds; // Skills this character has mastered
+  List<String> completedMissionIds; // Epic quests this hero has completed!
+  DateTime? createdAt;
+  DateTime? lastActive;
   
-  /// 캐릭터 생성 날짜
-  final DateTime createdAt;
+  // D&D character profile data
+  String? dndClassName;
+  String? dndSpecialty;
+  List<String>? dndSkills;
   
-  /// 경험치 getter (다른 클래스에서 사용하던 프로퍼티명과 호환)
-  int get experiencePoints => totalExperience;
-
-  /// 디버깅을 위한 출력
-  void _debugPrint(String message) {
-    // ignore: avoid_print
-    print('👤 Character ($name): $message');
+  // 간편하게 경험치 포인트에 접근
+  int get experiencePoints => experience;
+  
+  // 캐릭터의 스킬을 가져오는 메소드 (외부에서 구현해야 함)
+  List<Skill> get skills {
+    // 기본 스킬 중에서 이 캐릭터의 스킬 ID에 해당하는 것들만 반환
+    // 실제 구현에서는 데이터베이스에서 가져와야 하지만 임시로 더미 데이터 반환
+    final defaultSkills = Skill.createDefaultSkills();
+    if (skillIds.isEmpty) return [];
+    
+    // 실제로는 ID에 맞는 스킬을 찾아야 하지만, 지금은 간단히 처음 몇개만 반환
+    return defaultSkills.take(skillIds.length).toList();
   }
   
-  /// 캐릭터 생성자
   Character({
     String? id,
     required this.name,
     required this.userId,
-    String? email,
+    this.email = '',
     required this.specialty,
-    required this.battleCry,
-    List<Skill>? skills,
+    this.battleCry = "Let's make family history awesome!",
     this.level = 1,
-    this.totalExperience = 0,
-    int? experienceToNextLevel,
+    this.experience = 0,
     this.clanId,
-    DateTime? createdAt,
+    Color? color,
+    List<String>? skillIds,
+    List<String>? completedMissionIds,
+    this.createdAt,
+    this.lastActive,
+    this.dndClassName,
+    this.dndSpecialty,
+    this.dndSkills,
   }) : 
-    id = id ?? const Uuid().v4(),
-    email = email ?? '$userId@example.com',
-    skills = skills ?? _generateDefaultSkills(specialty),
-    experienceToNextLevel = experienceToNextLevel ?? (level * 100),
-    createdAt = createdAt ?? DateTime.now() {
-    _debugPrint('새로운 캐릭터 생성: $name (ID: $id)');
+    this.id = id ?? Uuid().v4(),
+    this.color = color ?? Colors.blue,
+    this.skillIds = skillIds ?? [],
+    this.completedMissionIds = completedMissionIds ?? [];
+  
+  /// Calculate the XP needed for the next level
+  int get experienceToNextLevel {
+    // RPG-style exponential XP curve - the higher the level, the more XP needed!
+    return (100 * level * (1 + level * 0.1)).round();
   }
   
-  /// 기본 스킬 생성
-  static List<Skill> _generateDefaultSkills(CharacterSpecialty specialty) {
-    // 각 역할에 맞는 기본 스킬 생성
-    List<Skill> defaultSkills = [];
-    
-    switch (specialty) {
-      case CharacterSpecialty.leader:
-        defaultSkills = [
-          Skill(name: '지휘 능력', description: '팀의 효율성을 높입니다'),
-          Skill(name: '선견지명', description: '미래의 장애물을 예측합니다'),
-          Skill(name: '영감', description: '팀에게 동기부여를 제공합니다'),
-        ];
-        break;
-        
-      case CharacterSpecialty.warrior:
-        defaultSkills = [
-          Skill(name: '문제 해결', description: '어려운 문제를 빠르게 해결합니다'),
-          Skill(name: '인내력', description: '장기 과제에 대한 인내심을 발휘합니다'),
-          Skill(name: '집중력', description: '중요한 세부사항에 집중합니다'),
-        ];
-        break;
-        
-      case CharacterSpecialty.mage:
-        defaultSkills = [
-          Skill(name: '창의적 사고', description: '새로운 아이디어를 생각해냅니다'),
-          Skill(name: '혁신', description: '전통적인 방법을 개선합니다'),
-          Skill(name: '지식 탐구', description: '새로운 지식을 습득합니다'),
-        ];
-        break;
-        
-      case CharacterSpecialty.healer:
-        defaultSkills = [
-          Skill(name: '소통 능력', description: '팀원 간의 소통을 원활하게 합니다'),
-          Skill(name: '공감', description: '타인의 관점을 이해합니다'),
-          Skill(name: '화합', description: '팀 내 갈등을 해결합니다'),
-        ];
-        break;
-        
-      case CharacterSpecialty.scout:
-        defaultSkills = [
-          Skill(name: '정보 수집', description: '유용한 정보를 찾아냅니다'),
-          Skill(name: '분석력', description: '복잡한 데이터를 분석합니다'),
-          Skill(name: '전략적 사고', description: '장기적인 전략을 수립합니다'),
-        ];
-        break;
-        
-      default:
-        defaultSkills = [
-          Skill(name: '적응력', description: '다양한 상황에 적응합니다'),
-          Skill(name: '문제 해결', description: '문제를 창의적으로 해결합니다'),
-          Skill(name: '협업 능력', description: '팀원들과 효과적으로 협력합니다'),
-        ];
-        break;
-    }
-    
-    return defaultSkills;
-  }
-  
-  /// 경험치 획득
-  void gainExperience(int amount) {
-    if (amount <= 0) {
-      _debugPrint('유효하지 않은 경험치 값: $amount');
-      return;
-    }
-    
-    _debugPrint('경험치 획득: +$amount');
-    totalExperience += amount;
-    
-    // 경험치 적용 및 레벨업 확인
-    if (amount >= experienceToNextLevel) {
-      int remainingExp = amount - experienceToNextLevel;
-      levelUp();
-      
-      // 남은 경험치 처리
-      if (remainingExp > 0) {
-        gainExperience(remainingExp);
-      }
-    } else {
-      experienceToNextLevel -= amount;
-      _debugPrint('다음 레벨까지 필요 경험치: $experienceToNextLevel');
-    }
-  }
-  
-  /// addExperience는 gainExperience와 동일 (호환성 유지를 위한 alias)
-  void addExperience(int amount) {
-    gainExperience(amount);
-  }
-  
-  /// 다음 레벨까지 필요한 경험치 계산
+  /// Calculate the XP needed for the next level (alias for compatibility)
   int calculateNextLevelExp() {
     return experienceToNextLevel;
   }
   
-  /// 레벨업
-  void levelUp() {
-    level++;
-    // 레벨이 올라갈수록 다음 레벨까지 필요한 경험치 증가
-    experienceToNextLevel = level * 100;
-    _debugPrint('레벨업! 현재 레벨: $level, 다음 레벨까지 필요 경험치: $experienceToNextLevel');
-    
-    // 랜덤으로 스킬 중 하나를 레벨업
-    if (skills.isNotEmpty) {
-      final random = DateTime.now().millisecondsSinceEpoch % skills.length;
-      final skill = skills[random];
-      skill.levelUp();
-      _debugPrint('스킬 레벨업: ${skill.name} (Lv.${skill.level})');
+  /// Current XP progress percentage towards next level
+  double get levelProgress {
+    return experience / experienceToNextLevel;
+  }
+  
+  /// Create a copy of the character with optional new values
+  Character copyWith({
+    String? id,
+    String? name,
+    String? userId,
+    String? email,
+    CharacterSpecialty? specialty,
+    String? battleCry,
+    int? level,
+    int? experience,
+    String? clanId,
+    Color? color,
+    List<String>? skillIds,
+    List<String>? completedMissionIds,
+    DateTime? createdAt,
+    DateTime? lastActive,
+    String? dndClassName,
+    String? dndSpecialty,
+    List<String>? dndSkills,
+  }) {
+    return Character(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      userId: userId ?? this.userId,
+      email: email ?? this.email,
+      specialty: specialty ?? this.specialty,
+      battleCry: battleCry ?? this.battleCry,
+      level: level ?? this.level,
+      experience: experience ?? this.experience,
+      clanId: clanId ?? this.clanId,
+      color: color ?? this.color,
+      skillIds: skillIds ?? List.from(this.skillIds),
+      completedMissionIds: completedMissionIds ?? List.from(this.completedMissionIds),
+      createdAt: createdAt ?? this.createdAt,
+      lastActive: lastActive ?? this.lastActive,
+      dndClassName: dndClassName ?? this.dndClassName,
+      dndSpecialty: dndSpecialty ?? this.dndSpecialty,
+      dndSkills: dndSkills ?? this.dndSkills,
+    );
+  }
+  
+  /// Add skills to the character's skillset
+  Character addSkills(List<Skill> skills) {
+    final newSkillIds = List<String>.from(skillIds);
+    for (final skill in skills) {
+      if (!newSkillIds.contains(skill.id)) {
+        newSkillIds.add(skill.id);
+      }
     }
+    return copyWith(skillIds: newSkillIds);
   }
   
-  /// 스킬 추가
-  void addSkill(Skill skill) {
-    if (skills.any((s) => s.name == skill.name)) {
-      _debugPrint('해당 스킬이 이미 존재합니다: ${skill.name}');
-      return;
+  /// 경험치를 추가하고 레벨업 처리 (gainExperience)
+  Future<bool> gainExperience(int amount) async {
+    if (amount <= 0) return false;
+    
+    experience += amount;
+    bool leveledUp = false;
+    
+    // 레벨업 처리
+    while (experience >= experienceToNextLevel) {
+      experience -= experienceToNextLevel;
+      level++;
+      leveledUp = true;
+      
+      // 레벨업 효과음 및 애니메이션
+      if (leveledUp) {
+        GameEffectsService().playSound(GameSound.levelUp);
+      }
     }
     
-    skills.add(skill);
-    _debugPrint('새로운 스킬 추가됨: ${skill.name}');
+    return leveledUp;
   }
   
-  /// 스킬 업그레이드
-  void upgradeSkill(String skillName, int experienceAmount) {
-    final skillIndex = skills.indexWhere((s) => s.name == skillName);
-    if (skillIndex == -1) {
-      _debugPrint('스킬을 찾을 수 없음: $skillName');
-      return;
-    }
-    
-    skills[skillIndex].gainExperience(experienceAmount);
-    _debugPrint('스킬 경험치 추가: $skillName +$experienceAmount');
+  /// 경험치를 추가하고 레벨업 처리 (addExperience)
+  /// (backward compatibility)
+  Future<bool> addExperience(int amount) async {
+    return gainExperience(amount);
   }
   
-  /// 클랜 가입
-  void joinClan(String newClanId) {
-    clanId = newClanId;
-    _debugPrint('클랜 가입: $newClanId');
+  /// Set D&D character info from OpenAI generated data
+  Character setDnDCharacterInfo(Map<String, dynamic> dndData) {
+    return copyWith(
+      dndClassName: dndData['class_name'],
+      dndSpecialty: dndData['specialty'],
+      dndSkills: List<String>.from(dndData['skills'] ?? []),
+    );
   }
   
-  /// 클랜 탈퇴
-  void leaveClan() {
-    if (clanId == null) {
-      _debugPrint('가입된 클랜이 없습니다');
-      return;
-    }
-    
-    String oldClanId = clanId!;
-    clanId = null;
-    _debugPrint('클랜 탈퇴: $oldClanId');
+  /// 캐릭터를 클랜에 가입시킵니다
+  Character joinClan(String newClanId) {
+    return copyWith(clanId: newClanId);
   }
   
-  /// JSON으로 변환
+  /// 캐릭터를 클랜에서 탈퇴시킵니다
+  Character leaveClan() {
+    return copyWith(clanId: null);
+  }
+  
+  /// Convert to JSON for storage
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
       'userId': userId,
       'email': email,
-      'specialty': specialty.name,
+      'specialty': specialty.toString().split('.').last,
       'battleCry': battleCry,
-      'skills': skills.map((skill) => skill.toJson()).toList(),
       'level': level,
-      'totalExperience': totalExperience,
-      'experienceToNextLevel': experienceToNextLevel,
+      'experience': experience,
       'clanId': clanId,
-      'createdAt': createdAt.toIso8601String(),
+      'color': color.value,
+      'skillIds': skillIds,
+      'completedMissionIds': completedMissionIds,
+      'createdAt': createdAt?.toIso8601String(),
+      'lastActive': lastActive?.toIso8601String(),
+      'dndClassName': dndClassName,
+      'dndSpecialty': dndSpecialty,
+      'dndSkills': dndSkills,
     };
   }
   
-  /// JSON에서 변환
+  /// Create character from JSON data
   factory Character.fromJson(Map<String, dynamic> json) {
     return Character(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      userId: json['userId'] as String,
-      email: json['email'] as String?,
-      specialty: CharacterSpecialty.values.firstWhere((e) => e.name == json['specialty']),
-      battleCry: json['battleCry'] as String,
-      skills: (json['skills'] as List).map((skillJson) => Skill.fromJson(skillJson)).toList(),
-      level: json['level'] as int,
-      totalExperience: json['totalExperience'] as int,
-      experienceToNextLevel: json['experienceToNextLevel'] as int,
-      clanId: json['clanId'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      id: json['id'],
+      name: json['name'],
+      userId: json['userId'],
+      email: json['email'] ?? '',
+      specialty: _specialtyFromString(json['specialty'] ?? 'warrior'),
+      battleCry: json['battleCry'] ?? "Let's make family history awesome!",
+      level: json['level'] ?? 1,
+      experience: json['experience'] ?? 0,
+      clanId: json['clanId'],
+      color: Color(json['color'] ?? Colors.blue.value),
+      skillIds: List<String>.from(json['skillIds'] ?? []),
+      completedMissionIds: List<String>.from(json['completedMissionIds'] ?? []),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      lastActive: json['lastActive'] != null ? DateTime.parse(json['lastActive']) : null,
+      dndClassName: json['dndClassName'],
+      dndSpecialty: json['dndSpecialty'],
+      dndSkills: json['dndSkills'] != null ? List<String>.from(json['dndSkills']) : null,
     );
+  }
+  
+  /// 문자열에서 CharacterSpecialty 열거형으로 변환하는 도우미 메소드
+  static CharacterSpecialty _specialtyFromString(String typeStr) {
+    switch (typeStr) {
+      case 'leader': return CharacterSpecialty.leader;
+      case 'warrior': return CharacterSpecialty.warrior;
+      case 'mage': return CharacterSpecialty.mage;
+      case 'healer': return CharacterSpecialty.healer;
+      case 'scout': return CharacterSpecialty.scout;
+      case 'ranger': return CharacterSpecialty.ranger;
+      case 'rogue': return CharacterSpecialty.rogue;
+      case 'cleric': return CharacterSpecialty.cleric;
+      default: return CharacterSpecialty.warrior;
+    }
   }
 } 

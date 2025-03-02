@@ -9,6 +9,7 @@ import 'character_profile_screen.dart';
 import 'project_detail_screen.dart';
 import 'create_project_screen.dart';
 import 'clan_members_screen.dart';
+import 'settings_screen.dart';
 
 /// 클랜 대시보드 화면
 /// 클랜의 프로젝트 목록과 클랜 정보를 보여주는 메인 화면입니다.
@@ -31,6 +32,9 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
   Clan? _clan;
   List<Project> _projects = [];
   int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+  
+  late MockDataService _mockDataService;
   
   // 디버깅 출력
   void _debugPrint(String message) {
@@ -42,6 +46,9 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
   void initState() {
     super.initState();
     _debugPrint('초기화 중...');
+    
+    // 서비스 초기화
+    _mockDataService = MockDataService();
     
     // 데이터 로드
     _loadData();
@@ -140,73 +147,58 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
   
   /// 클랜 멤버 화면으로 이동
   void _navigateToClanMembers() {
-    _debugPrint('클랜 멤버 화면으로 이동');
-    
-    if (_clan == null) return;
-    
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ClanMembersScreen(
-          character: widget.character,
-          clan: _clan!,
-        ),
-      ),
-    ).then((_) {
-      // 화면이 돌아오면 데이터 다시 로드
-      _loadData();
-    });
+    // 이 함수는 이제 PageView로 대체되어 사용하지 않습니다.
   }
   
   /// 캐릭터 프로필 화면으로 이동
-  void _navigateToCharacterProfile() {
-    _debugPrint('캐릭터 프로필 화면으로 이동');
-    
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CharacterProfileScreen(
-          character: widget.character,
+  void _navigateToCharacterProfile(Character selectedCharacter) {
+    if (selectedCharacter.id != widget.character.id) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CharacterProfileScreen(
+            character: selectedCharacter,
+            isUserCharacter: false,
+          ),
         ),
-      ),
-    ).then((_) {
-      // 화면이 돌아오면 데이터 다시 로드
-      _loadData();
-    });
+      );
+    }
   }
   
   /// 하단 탭 변경 처리
   void _onBottomNavTapped(int index) {
-    _debugPrint('하단 탭 변경: $index');
-    
     setState(() {
       _selectedIndex = index;
     });
-    
-    // 탭에 따라 다른 화면으로 이동
-    switch (index) {
-      case 1: // 멤버 화면
-        _navigateToClanMembers();
-        break;
-      case 2: // 프로필 화면
-        _navigateToCharacterProfile();
-        break;
+
+    // 설정 페이지는 별도 화면으로 이동
+    if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ).then((_) {
+        // 설정 화면에서 돌아오면 이전 탭으로 복원
+        setState(() {
+          _selectedIndex = 0;
+        });
+      });
+    } else {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text(_clan?.name ?? '클랜 대시보드'),
-        centerTitle: true,
-        actions: [
-          // 새로고침 버튼
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
-            tooltip: '새로고침',
-          ),
-        ],
+        title: _isLoading 
+            ? const Text('로딩 중...') 
+            : Text('${_clan?.name ?? '대시보드'}'),
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator()) 
@@ -214,7 +206,19 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
               ? _buildErrorView()
               : _clan == null
                   ? const Center(child: Text('클랜 정보를 찾을 수 없습니다'))
-                  : _buildClanDashboard(),
+                  : PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _selectedIndex = index;
+                        });
+                      },
+                      children: [
+                        _buildClanDashboard(),
+                        _buildClanMembersScreen(),
+                        _buildProfileScreen(),
+                      ],
+                    ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTapped,
@@ -234,12 +238,16 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
             icon: Icon(Icons.person),
             label: '프로필',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: '설정',
+          ),
         ],
       ),
-      floatingActionButton: _clan != null ? FloatingActionButton(
+      floatingActionButton: _clan != null && _selectedIndex == 0 ? FloatingActionButton(
         onPressed: _navigateToCreateProject,
-        backgroundColor: AppTheme.primaryColor,
         child: const Icon(Icons.add),
+        backgroundColor: AppTheme.secondaryColor,
       ) : null,
     );
   }
@@ -628,6 +636,70 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// 프로필 화면 위젯 구성
+  Widget _buildProfileScreen() {
+    return CharacterProfileScreen(
+      character: widget.character,
+      isUserCharacter: true,
+    );
+  }
+  
+  /// 클랜 멤버 화면 위젯 구성
+  Widget _buildClanMembersScreen() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '클랜 멤버',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 16),
+            if (_clan!.memberIds.isEmpty)
+              const Center(
+                child: Text('클랜에 멤버가 없습니다.'),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _clan!.memberIds.length,
+                itemBuilder: (context, index) {
+                  final characterId = _clan!.memberIds[index];
+                  // 캐릭터 정보 가져오기
+                  final character = _mockDataService.getCharacterById(characterId);
+                  if (character == null) {
+                    return const ListTile(
+                      title: Text('알 수 없는 캐릭터'),
+                    );
+                  }
+                  
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppTheme.primaryColor,
+                        child: Text(
+                          character.name.isNotEmpty ? character.name[0].toUpperCase() : '?',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      title: Text(character.name),
+                      subtitle: Text('레벨 ${character.level} ${character.specialty.displayName}'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => _navigateToCharacterProfile(character),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),

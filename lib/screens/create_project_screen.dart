@@ -7,6 +7,7 @@ import '../models/project.dart';
 import '../models/mission.dart' as app_mission;
 import '../services/mock_ai_service.dart';
 import '../services/mock_data_service.dart';
+import '../services/openai_service.dart';
 import '../theme/app_theme.dart';
 
 /// 프로젝트 생성 화면
@@ -33,12 +34,16 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   bool _isLoading = false;
   bool _isGeneratingName = false;
   bool _isGeneratingMissions = false;
+  bool _isGeneratingAchievements = false;
   String? _errorMessage;
   final List<app_mission.Mission> _missions = [];
   DateTime _dueDate = DateTime.now().add(const Duration(days: 30)); // 기본값은 현재로부터 30일 후
+  List<Achievement> _achievements = [];
+  bool _useOpenAI = true; // OpenAI API 사용 여부
   
   // AI 서비스 및 데이터 서비스
-  late MockAIService _aiService;
+  late MockAIService _mockAiService;
+  late OpenAIService _openAiService;
   late MockDataService _dataService;
   
   // 디버깅 출력
@@ -50,18 +55,61 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _mockAiService = MockAIService();
+    _openAiService = OpenAIService();
+    _dataService = Provider.of<MockDataService>(context, listen: false);
     
-    _aiService = MockAIService();
+    // 기본 업적 설정
+    _achievements = [
+      Achievement(
+        name: 'Project Founder',
+        description: 'Created your first project!',
+        condition: 'Create a project',
+        experienceReward: 100,
+        tier: AchievementTier.bronze,
+        isUnlocked: true,
+        unlockedAt: DateTime.now()
+      ),
+      Achievement(
+        name: 'Mission Strategist',
+        description: 'Created 5 or more missions.',
+        condition: 'Create 5 or more missions',
+        experienceReward: 200,
+        tier: AchievementTier.silver
+      ),
+      Achievement(
+        name: 'Project Master',
+        description: 'Successfully completed a project.',
+        condition: 'Complete all missions',
+        experienceReward: 500,
+        tier: AchievementTier.gold
+      ),
+    ];
     
-    // 랜덤 이름으로 초기화
-    _generateRandomProjectName();
+    // OpenAI 서비스 초기화
+    _initializeOpenAI();
   }
   
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _dataService = Provider.of<MockDataService>(context, listen: false);
+  /// OpenAI 서비스 초기화
+  Future<void> _initializeOpenAI() async {
+    try {
+      await _openAiService.initialize();
+    } catch (e) {
+      _debugPrint('OpenAI 초기화 실패: $e');
+      setState(() {
+        _useOpenAI = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('OpenAI API 초기화 실패: $e\n목업 데이터를 사용합니다.'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
   }
   
   @override
@@ -72,24 +120,52 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     super.dispose();
   }
   
-  /// 프로젝트 이름 랜덤 생성
-  Future<void> _generateRandomProjectName() async {
-    _debugPrint('프로젝트 이름 랜덤 생성 중...');
+  /// 프로젝트 이름 생성
+  Future<void> _generateProjectName() async {
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로젝트 설명을 입력해주세요'),
+        ),
+      );
+      return;
+    }
     
     setState(() {
       _isGeneratingName = true;
     });
     
     try {
-      final projectName = _aiService.generateProjectName();
+      final description = _descriptionController.text.trim();
+      String projectName;
+      
+      if (_useOpenAI) {
+        // OpenAI API 사용
+        projectName = await _openAiService.generateProjectName(description);
+      } else {
+        // 목업 데이터 사용
+        projectName = _mockAiService.generateProjectName();
+      }
       
       setState(() {
         _nameController.text = projectName;
       });
       
-      _debugPrint('생성된 프로젝트 이름: $projectName');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('프로젝트 이름이 생성되었습니다: $projectName'),
+        ),
+      );
     } catch (e) {
       _debugPrint('프로젝트 이름 생성 오류: $e');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('프로젝트 이름 생성 중 오류가 발생했습니다: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() {
         _isGeneratingName = false;
@@ -97,16 +173,12 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     }
   }
   
-  /// 초기 미션 자동 생성
-  Future<void> _generateInitialMissions() async {
-    _debugPrint('초기 미션 자동 생성 중...');
-    
-    // 프로젝트 이름과 설명이 비어있으면 생성 불가
+  /// 미션 생성
+  Future<void> _generateMissions() async {
     if (_nameController.text.trim().isEmpty || _descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('프로젝트 이름과 설명을 먼저 입력해주세요'),
-          backgroundColor: Colors.red,
+          content: Text('프로젝트 이름과 설명을 모두 입력해주세요'),
         ),
       );
       return;
@@ -117,36 +189,43 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     });
     
     try {
-      // 3~5개의 미션 생성
-      final count = 3 + (DateTime.now().millisecondsSinceEpoch % 3);
-      final newMissions = <app_mission.Mission>[];
+      final projectName = _nameController.text.trim();
+      final description = _descriptionController.text.trim();
+      List<app_mission.Mission> newMissions;
       
-      for (var i = 0; i < count; i++) {
-        final missionName = _aiService.generateMissionName();
-        final missionDescription = _aiService.generateMissionDescription();
+      if (_useOpenAI) {
+        // OpenAI API 사용
+        final aiMissions = await _openAiService.generateMissions(description, projectName, 3);
         
-        final mission = app_mission.Mission(
+        // ID 및 생성자 정보 추가
+        newMissions = aiMissions.map((m) => app_mission.Mission(
           id: const Uuid().v4(),
-          name: missionName,
-          description: missionDescription,
+          name: (m as app_mission.Mission).name,
+          description: m.description,
           status: app_mission.MissionStatus.todo,
           creatorCharacterId: widget.character.id,
           assignedCharacterIds: [],
-          experienceReward: 50 + (i * 10), // 50, 60, 70, 80, 90
-        );
+          experienceReward: m.experienceReward,
+        )).toList();
+      } else {
+        // 목업 데이터 사용
+        final aiMissionData = _mockAiService.generateMissions(3);
         
-        newMissions.add(mission);
-        _debugPrint('미션 생성: ${mission.name}');
+        newMissions = aiMissionData.map((data) => app_mission.Mission(
+          id: const Uuid().v4(),
+          name: data['name'] as String,
+          description: data['description'] as String,
+          status: app_mission.MissionStatus.todo,
+          creatorCharacterId: widget.character.id,
+          assignedCharacterIds: [],
+          experienceReward: 50 + (DateTime.now().millisecondsSinceEpoch % 50),
+        )).toList();
       }
       
       setState(() {
-        _missions.clear();
         _missions.addAll(newMissions);
       });
       
-      _debugPrint('${newMissions.length}개의 미션 생성 완료');
-      
-      // 알림 표시
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -166,6 +245,58 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     } finally {
       setState(() {
         _isGeneratingMissions = false;
+      });
+    }
+  }
+  
+  /// 업적 생성
+  Future<void> _generateAchievements() async {
+    if (_nameController.text.trim().isEmpty || _descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('프로젝트 이름과 설명을 모두 입력해주세요'),
+        ),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isGeneratingAchievements = true;
+    });
+    
+    try {
+      final projectName = _nameController.text.trim();
+      final description = _descriptionController.text.trim();
+      
+      if (_useOpenAI) {
+        // OpenAI API 사용
+        _achievements = await _openAiService.generateAchievements(description, projectName);
+      } else {
+        // 목업 데이터 사용 (기존 업적 그대로 유지)
+        _debugPrint('목업 데이터 사용: 기본 업적 유지');
+      }
+      
+      setState(() {});
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_achievements.length}개의 업적이 생성되었습니다'),
+        ),
+      );
+    } catch (e) {
+      _debugPrint('업적 생성 오류: $e');
+      
+      // 에러 알림
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('업적 생성 중 오류가 발생했습니다: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isGeneratingAchievements = false;
       });
     }
   }
@@ -264,33 +395,6 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     });
     
     try {
-      // 첫 번째 보상 업적 추가 (프로젝트 생성자에게만 해제)
-      final achievements = <Achievement>[
-        Achievement(
-          name: 'Project Founder',
-          description: 'Created your first project!',
-          condition: 'Create a project',
-          experienceReward: 100,
-          tier: AchievementTier.bronze,
-          isUnlocked: true,
-          unlockedAt: DateTime.now()
-        ),
-        Achievement(
-          name: 'Mission Strategist',
-          description: 'Created 5 or more missions.',
-          condition: 'Create 5 or more missions',
-          experienceReward: 200,
-          tier: AchievementTier.silver
-        ),
-        Achievement(
-          name: 'Project Master',
-          description: 'Successfully completed a project.',
-          condition: 'Complete all missions',
-          experienceReward: 500,
-          tier: AchievementTier.gold
-        ),
-      ];
-      
       // 최종 프로젝트 생성
       final newProject = Project(
         name: name,
@@ -307,7 +411,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
           experienceReward: m.experienceReward,
         )).toList(),
         assignedCharacterIds: [widget.character.id],
-        achievements: achievements,
+        achievements: _achievements,
       );
       
       _dataService.addProject(newProject).then((_) {
@@ -317,7 +421,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         _dataService.updateClan(updatedClan);
         
         // 경험치 보상 지급
-        final expReward = achievements[0].experienceReward;
+        final expReward = _achievements[0].experienceReward;
         widget.character.addExperience(expReward);
         _dataService.updateCharacter(widget.character);
         
@@ -353,6 +457,29 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       appBar: AppBar(
         title: const Text('새 프로젝트 생성'),
         centerTitle: true,
+        actions: [
+          // OpenAI API 스위치
+          Row(
+            children: [
+              const Text('AI 사용', style: TextStyle(fontSize: 12)),
+              Switch(
+                value: _useOpenAI,
+                onChanged: (value) {
+                  setState(() {
+                    _useOpenAI = value;
+                  });
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(_useOpenAI ? 'OpenAI API 사용' : '목업 데이터 사용'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -455,7 +582,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                 
                                 // 랜덤 이름 생성 버튼
                                 IconButton(
-                                  onPressed: _isGeneratingName ? null : _generateRandomProjectName,
+                                  onPressed: _isGeneratingName ? null : _generateProjectName,
                                   icon: _isGeneratingName
                                       ? const SizedBox(
                                           width: 24,
@@ -500,6 +627,92 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     
                     const SizedBox(height: 24),
                     
+                    // 미션 섹션 바로 위에 업적 섹션 추가
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            '업적',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: _isGeneratingAchievements ? null : _generateAchievements,
+                            icon: _isGeneratingAchievements
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.auto_awesome),
+                            label: const Text('업적 생성'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // 업적 목록
+                    if (_achievements.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          child: ListView.separated(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: _achievements.length,
+                            separatorBuilder: (context, index) => const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final achievement = _achievements[index];
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: _getAchievementColor(achievement.tier),
+                                  child: const Icon(Icons.emoji_events, color: Colors.white),
+                                ),
+                                title: Text(achievement.name),
+                                subtitle: Text(
+                                  '${achievement.description}\n조건: ${achievement.condition}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '+${achievement.experienceReward} XP',
+                                      style: const TextStyle(
+                                        color: AppTheme.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      _getAchievementTierName(achievement.tier),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: _getAchievementColor(achievement.tier),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                isThreeLine: true,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    
+                    const SizedBox(height: 24),
+                    
                     // 미션 섹션 헤더
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -514,7 +727,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                         
                         // 미션 자동 생성 버튼
                         TextButton.icon(
-                          onPressed: _isGeneratingMissions ? null : _generateInitialMissions,
+                          onPressed: _isGeneratingMissions ? null : _generateMissions,
                           icon: _isGeneratingMissions
                               ? const SizedBox(
                                   width: 16,
@@ -714,6 +927,38 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         ),
       ),
     );
+  }
+  
+  /// 업적 등급에 맞는 색상 반환
+  Color _getAchievementColor(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.bronze:
+        return Colors.brown;
+      case AchievementTier.silver:
+        return Colors.grey;
+      case AchievementTier.gold:
+        return Colors.amber;
+      case AchievementTier.platinum:
+        return Colors.blueGrey;
+      case AchievementTier.diamond:
+        return Colors.lightBlue;
+    }
+  }
+  
+  /// 업적 등급 이름 반환
+  String _getAchievementTierName(AchievementTier tier) {
+    switch (tier) {
+      case AchievementTier.bronze:
+        return '브론즈';
+      case AchievementTier.silver:
+        return '실버';
+      case AchievementTier.gold:
+        return '골드';
+      case AchievementTier.platinum:
+        return '플래티넘';
+      case AchievementTier.diamond:
+        return '다이아몬드';
+    }
   }
 }
 

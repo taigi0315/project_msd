@@ -42,10 +42,10 @@ dependencies:
   google_fonts: ^6.2.0
   flutter_svg: ^2.0.9
   animated_text_kit: ^4.2.2
-  lottie: ^3.0.0
+  lottie: ^3.3.1
   
   # Local storage
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
@@ -53,9 +53,14 @@ dependencies:
   http: ^1.2.0
   uuid: ^4.3.3
   
+  # OpenAI API Integration
+  openai_dart: ^0.4.5
+  dotenv: ^4.2.0
+  
   # Navigation
   go_router: ^13.2.0
   intl: ^0.20.2
+  audioplayers: ^6.2.0
   
   # Firebase mockup
   # firebase_core: ^2.25.4
@@ -72,6 +77,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -88,7 +95,9 @@ flutter:
   assets:
     - assets/images/
     - assets/animations/
+    - assets/sounds/
     - assets/fonts/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

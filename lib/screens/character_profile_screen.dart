@@ -6,15 +6,20 @@ import '../services/mock_data_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'package:intl/intl.dart';
+import '../models/skill.dart';
 
 /// 캐릭터 프로필 화면
 /// 캐릭터의 정보와 업적, 레벨, 경험치 등을 보여주는 화면입니다.
 class CharacterProfileScreen extends StatefulWidget {
   final Character character;
+  final bool isUserCharacter;
+  final String? characterId;
   
   const CharacterProfileScreen({
     super.key, 
     required this.character,
+    this.characterId,
+    this.isUserCharacter = false,
   });
 
   @override
@@ -329,8 +334,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
             unselectedLabelColor: Colors.grey,
             tabs: const [
               Tab(text: '정보'),
+              Tab(text: '스킬'),
               Tab(text: '업적'),
-              Tab(text: '통계'),
             ],
           ),
         ),
@@ -341,8 +346,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
             controller: _tabController,
             children: [
               _buildInfoTab(),
+              _buildSkillsTab(),
               _buildAchievementsTab(),
-              _buildStatsTab(),
             ],
           ),
         ),
@@ -598,7 +603,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                   const Divider(),
                   
                   // 생성일
-                  _buildInfoRow('가입일', _formatDate(widget.character.createdAt)),
+                  _buildInfoRow('가입일', widget.character.createdAt != null ? _formatDate(widget.character.createdAt!) : '정보 없음'),
                   
                   const Divider(),
                   
@@ -686,6 +691,372 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
     );
   }
   
+  /// 스킬 탭 콘텐츠
+  Widget _buildSkillsTab() {
+    final skills = widget.character.skills;
+    
+    if (skills.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.auto_fix_high,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            const Text(
+              '습득한 스킬이 없습니다',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // 스킬 타입별로 그룹화
+    final Map<SkillType, List<Skill>> skillsByType = {
+      SkillType.combat: [],
+      SkillType.knowledge: [],
+      SkillType.social: [],
+      SkillType.survival: [],
+    };
+    
+    for (final skill in skills) {
+      skillsByType[skill.type]?.add(skill);
+    }
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 스킬 레벨 요약
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '스킬 요약',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // 스킬 통계 그리드
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildSkillStatCard(
+                        Icons.shield,
+                        _calculateAverageSkillLevel(skillsByType[SkillType.combat]!),
+                        '전투',
+                        Colors.red.shade700,
+                      ),
+                      
+                      _buildSkillStatCard(
+                        Icons.auto_fix_high,
+                        _calculateAverageSkillLevel(skillsByType[SkillType.knowledge]!),
+                        '지식',
+                        Colors.blue.shade700,
+                      ),
+                      
+                      _buildSkillStatCard(
+                        Icons.people,
+                        _calculateAverageSkillLevel(skillsByType[SkillType.social]!),
+                        '사회',
+                        Colors.green.shade700,
+                      ),
+                      
+                      _buildSkillStatCard(
+                        Icons.directions_walk,
+                        _calculateAverageSkillLevel(skillsByType[SkillType.survival]!),
+                        '생존',
+                        Colors.orange.shade700,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 각 타입별 스킬 목록
+          for (final entry in skillsByType.entries)
+            if (entry.value.isNotEmpty) ...[
+              _buildSkillTypeSection(entry.key, entry.value),
+              const SizedBox(height: 16),
+            ],
+        ],
+      ),
+    );
+  }
+  
+  /// 평균 스킬 레벨 계산
+  String _calculateAverageSkillLevel(List<Skill> skills) {
+    if (skills.isEmpty) {
+      return '0';
+    }
+    
+    final total = skills.fold<int>(0, (sum, skill) => sum + skill.level);
+    return (total / skills.length).toStringAsFixed(1);
+  }
+  
+  /// 스킬 타입별 섹션 빌드
+  Widget _buildSkillTypeSection(SkillType type, List<Skill> skills) {
+    final String title;
+    final Color color;
+    final IconData icon;
+    
+    switch (type) {
+      case SkillType.combat:
+        title = '전투 스킬';
+        color = Colors.red.shade700;
+        icon = Icons.shield;
+        break;
+      case SkillType.knowledge:
+        title = '지식 스킬';
+        color = Colors.blue.shade700;
+        icon = Icons.auto_fix_high;
+        break;
+      case SkillType.social:
+        title = '사회적 스킬';
+        color = Colors.green.shade700;
+        icon = Icons.people;
+        break;
+      case SkillType.survival:
+        title = '생존 스킬';
+        color = Colors.orange.shade700;
+        icon = Icons.directions_walk;
+        break;
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 섹션 헤더
+        Row(
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 8),
+        
+        // 스킬 목록
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: skills.length,
+          itemBuilder: (context, index) {
+            return _buildSkillCard(skills[index], color);
+          },
+        ),
+      ],
+    );
+  }
+  
+  /// 스킬 카드 위젯
+  Widget _buildSkillCard(Skill skill, Color themeColor) {
+    final double progress = 1.0 - (skill.experienceToNextLevel / (skill.level * 100));
+    
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: themeColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 스킬 이름과 레벨
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    skill.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: themeColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Lv.${skill.level}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 4),
+            
+            // 스킬 설명
+            Text(
+              skill.description,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // 다음 레벨 진행 상태
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '다음 레벨',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          
+                          Text(
+                            '${skill.experienceToNextLevel} XP 남음',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 4),
+                      
+                      // 경험치 진행바
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: Colors.grey[300],
+                          color: themeColor,
+                          minHeight: 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(width: 12),
+                
+                // 다음 레벨 정보 (nextLevelName이 없으므로 제거)
+                Tooltip(
+                  message: '다음 레벨: ${skill.level + 1}',
+                  child: Text(
+                    '다음 레벨: ${skill.level + 1}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// 스킬 통계 카드 위젯
+  Widget _buildSkillStatCard(IconData icon, String value, String label, Color color) {
+    return Container(
+      width: 70,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          
+          const SizedBox(height: 4),
+          
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          
+          const SizedBox(height: 2),
+          
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+  
   /// 업적 탭 콘텐츠
   Widget _buildAchievementsTab() {
     return _unlockedAchievements.isEmpty
@@ -731,147 +1102,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
               return _buildAchievementCard(achievement);
             },
           );
-  }
-  
-  /// 통계 탭 콘텐츠
-  Widget _buildStatsTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 활동 요약 카드
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '활동 요약',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // 통계 그리드
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatCard(
-                        Icons.task_alt,
-                        '$_completedMissions',
-                        '완료한 미션',
-                      ),
-                      
-                      _buildStatCard(
-                        Icons.emoji_events,
-                        '${_unlockedAchievements.length}',
-                        '획득한 업적',
-                      ),
-                      
-                      _buildStatCard(
-                        Icons.star,
-                        '${widget.character.level}',
-                        '현재 레벨',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 레벨 진행도 카드
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '레벨 진행도',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // 다음 레벨 정보
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '현재 레벨: ${widget.character.level}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      
-                      Text(
-                        '다음 레벨: ${widget.character.level + 1}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // 경험치 정보 표시
-                  Text(
-                    '현재 경험치: ${widget.character.experiencePoints} / 다음 레벨까지: ${widget.character.calculateNextLevelExp() - widget.character.experiencePoints}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  
-                  // 진행 상태 바
-                  LinearProgressIndicator(
-                    value: widget.character.experiencePoints / widget.character.calculateNextLevelExp(),
-                    backgroundColor: Colors.grey[200],
-                    color: AppTheme.primaryColor,
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // 남은 경험치 안내
-                  Text(
-                    '다음 레벨까지 ${widget.character.calculateNextLevelExp() - widget.character.experiencePoints} XP 남았습니다',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
   
   /// 정보 행 위젯
@@ -954,56 +1184,6 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
     );
   }
   
-  /// 통계 카드 위젯
-  Widget _buildStatCard(IconData icon, String value, String label) {
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: AppTheme.primaryColor,
-            size: 28,
-          ),
-          
-          const SizedBox(height: 8),
-          
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const SizedBox(height: 4),
-          
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-  
   /// 날짜 포맷 반환
   String _formatDate(DateTime date) {
     final formatter = DateFormat('yyyy년 MM월 dd일');
@@ -1074,59 +1254,5 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       default:
         return '다양한 능력으로 문제를 해결합니다';
     }
-  }
-
-  /// 레벨 정보 그리기
-  Widget _buildLevelInfo() {
-    const double progressHeight = 12.0;
-    final currentExp = widget.character.experiencePoints;
-    final nextLevelExp = widget.character.calculateNextLevelExp();
-    
-    return Container(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '레벨 ${widget.character.level}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                  ),
-                ),
-                Text(
-                  '${currentExp} / ${currentExp + nextLevelExp} XP',
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8.0),
-                // 진행률 바
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(progressHeight / 2),
-                  child: LinearProgressIndicator(
-                    value: nextLevelExp > 0 ? (nextLevelExp - widget.character.experienceToNextLevel) / nextLevelExp : 0,
-                    minHeight: progressHeight,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.experienceColor),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 } 

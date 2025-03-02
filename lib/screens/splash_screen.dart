@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../theme/app_theme.dart';
+import '../services/tutorial_manager.dart';
 import 'login_screen.dart';
 
 /// 스플래시 화면
@@ -53,10 +54,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _controller.forward();
     
-    // 3초 후 로그인 화면으로 이동
+    // 3초 후 다음 화면으로 이동
     Timer(const Duration(seconds: 3), () {
-      _debugPrint('로그인 화면으로 이동 중...');
-      _navigateToLogin();
+      _debugPrint('다음 화면으로 이동 중...');
+      _checkTutorialStatus();
     });
   }
   
@@ -65,6 +66,25 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _controller.dispose();
     _debugPrint('리소스 해제됨');
     super.dispose();
+  }
+  
+  /// 튜토리얼 상태 확인
+  Future<void> _checkTutorialStatus() async {
+    final tutorialManager = TutorialManager.instance;
+    await tutorialManager.initialize();
+    
+    final shouldShowTutorial = await tutorialManager.shouldShowAppTutorial();
+    _debugPrint('튜토리얼 표시 여부: $shouldShowTutorial');
+    
+    if (shouldShowTutorial) {
+      // 튜토리얼을 아직 완료하지 않았으면 튜토리얼 표시
+      await tutorialManager.showAppTutorial(context);
+      // 튜토리얼 완료 후 로그인 화면으로 이동
+      _navigateToLogin();
+    } else {
+      // 이미 튜토리얼을 완료했으면 바로 로그인 화면으로 이동
+      _navigateToLogin();
+    }
   }
   
   /// 로그인 화면으로 이동
@@ -112,85 +132,91 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               
               // 중앙 콘텐츠
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 로고/아이콘 영역
-                    Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: Transform.scale(
-                        scale: _scaleAnimation.value,
-                        child: Container(
-                          width: screenWidth * 0.5,
-                          height: screenWidth * 0.5,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppTheme.primaryColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.shield_outlined,
-                              size: screenWidth * 0.3,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: screenHeight * 0.05),
-                    
-                    // 앱 이름 텍스트
-                    Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            'Family Choi Chronicles',
-                            textStyle: Theme.of(context).textTheme.displaySmall?.copyWith(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 로고/아이콘 영역
+                      Opacity(
+                        opacity: _opacityAnimation.value,
+                        child: Transform.scale(
+                          scale: _scaleAnimation.value,
+                          child: Container(
+                            width: screenWidth * 0.4,
+                            height: screenWidth * 0.4,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
                               color: AppTheme.primaryColor,
-                              fontWeight: FontWeight.bold,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
-                            speed: const Duration(milliseconds: 100),
+                            child: Center(
+                              child: Icon(
+                                Icons.shield_outlined,
+                                size: screenWidth * 0.25,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                        ],
-                        totalRepeatCount: 1,
-                        displayFullTextOnTap: true,
-                      ),
-                    ),
-                    
-                    SizedBox(height: screenHeight * 0.03),
-                    
-                    // 부제목
-                    Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: Text(
-                        '일상을 모험으로, 과제를 퀘스트로',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppTheme.textColor,
-                          fontStyle: FontStyle.italic,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    
-                    SizedBox(height: screenHeight * 0.08),
-                    
-                    // 로딩 인디케이터
-                    Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.secondaryColor),
+                      
+                      SizedBox(height: screenHeight * 0.03),
+                      
+                      // 앱 이름 텍스트
+                      Opacity(
+                        opacity: _opacityAnimation.value,
+                        child: AnimatedTextKit(
+                          animatedTexts: [
+                            TypewriterAnimatedText(
+                              'Family Choi Chronicles',
+                              textStyle: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth * 0.05,
+                              ),
+                              speed: const Duration(milliseconds: 100),
+                            ),
+                          ],
+                          totalRepeatCount: 1,
+                          displayFullTextOnTap: true,
+                        ),
                       ),
-                    ),
-                  ],
+                      
+                      SizedBox(height: screenHeight * 0.02),
+                      
+                      // 부제목
+                      Opacity(
+                        opacity: _opacityAnimation.value,
+                        child: Text(
+                          '일상을 모험으로, 과제를 퀘스트로',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: AppTheme.textColor,
+                            fontStyle: FontStyle.italic,
+                            fontSize: screenWidth * 0.03,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      
+                      SizedBox(height: screenHeight * 0.05),
+                      
+                      // 로딩 인디케이터
+                      Opacity(
+                        opacity: _opacityAnimation.value,
+                        child: const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.secondaryColor),
+                        ),
+                      ),
+                      
+                      SizedBox(height: screenHeight * 0.02),
+                    ],
+                  ),
                 ),
               ),
               

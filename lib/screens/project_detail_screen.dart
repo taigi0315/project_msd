@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/character.dart';
 import '../models/project.dart';
 import '../models/clan.dart';
 import '../models/mission.dart' as app_mission;
 import '../services/mock_data_service.dart';
+import '../services/mock_ai_service.dart';
+import '../services/openai_service.dart';
 import '../theme/app_theme.dart';
+import '../services/tutorial_manager.dart';
 
 /// 프로젝트 상세 화면
 /// 선택한 프로젝트의 모든 세부정보와 미션 목록을 표시합니다.
@@ -34,6 +38,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   List<Character> _assignedMembers = [];
   bool _isCharacterOwner = false;
   late TabController _tabController;
+  bool _useOpenAI = true; // OpenAI API 사용 여부
+  bool _isGeneratingMissions = false; // 미션 생성 중 상태
+  
+  // AI 서비스
+  late MockAIService _mockAiService;
+  late OpenAIService _openAiService;
+  
+  // 튜토리얼용 키
+  final GlobalKey _addMissionKey = GlobalKey();
+  final GlobalKey _generateMissionsKey = GlobalKey();
+  final GlobalKey _tabsKey = GlobalKey();
   
   // 디버깅 출력
   void _debugPrint(String message) {
@@ -45,7 +60,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _mockAiService = MockAIService();
+    _openAiService = OpenAIService();
     _loadProjectData();
+    
+    // OpenAI 서비스 초기화
+    _initializeOpenAI();
+    
+    // 튜토리얼 표시 (약간의 지연 후)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showTutorials();
+    });
   }
   
   @override
@@ -98,6 +123,44 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         _errorMessage = '프로젝트 데이터를 불러오는 중 오류가 발생했습니다: $e';
         _isLoading = false;
       });
+    }
+  }
+  
+  /// OpenAI 서비스 초기화
+  Future<void> _initializeOpenAI() async {
+    try {
+      await _openAiService.initialize();
+    } catch (e) {
+      _debugPrint('OpenAI 초기화 실패: $e');
+      setState(() {
+        _useOpenAI = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('OpenAI API 초기화 실패: $e\n목업 데이터를 사용합니다.'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+  
+  /// 튜토리얼 표시
+  Future<void> _showTutorials() async {
+    final tutorialManager = TutorialManager.instance;
+    
+    // 탭 튜토리얼
+    if (!tutorialManager.isFeatureTutorialShown('project_detail_tabs')) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      tutorialManager.showFeatureTutorial(
+        context: context,
+        featureKey: 'project_detail_tabs',
+        message: '탭을 사용하여 프로젝트의 미션, 업적, 정보를 확인할 수 있습니다.',
+        targetKey: _tabsKey,
+      );
     }
   }
   
@@ -468,7 +531,122 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
           ),
         ],
       ),
-    );
+    ).then((_) {
+      // 미션 추가 튜토리얼 표시
+      final tutorialManager = TutorialManager.instance;
+      if (!tutorialManager.isFeatureTutorialShown('mission_added')) {
+        tutorialManager.showFeatureTutorial(
+          context: context,
+          featureKey: 'mission_added',
+          message: '미션을 추가했습니다! 미션을 완료하면 경험치를 얻을 수 있습니다.',
+          targetKey: _tabsKey,
+        );
+      }
+    });
+  }
+  
+  /// AI로 추가 미션 생성
+  Future<void> _generateAdditionalMissions() async {
+    if (_project == null) return;
+    
+    _debugPrint('AI로 추가 미션 생성 중...');
+    
+    setState(() {
+      _isGeneratingMissions = true;
+    });
+    
+    try {
+      final dataService = Provider.of<MockDataService>(context, listen: false);
+      
+      // 현재 미션 목록을 앱 미션 형식으로 변환
+      final existingMissions = _project!.missions.map((m) => _convertToAppMission(m)).toList();
+      
+      List<app_mission.Mission> newMissions;
+      
+      if (_useOpenAI) {
+        // OpenAI API 사용
+        final aiMissions = await _openAiService.generateAdditionalMissions(
+          _project!.description, 
+          _project!.name, 
+          existingMissions, 
+          2
+        );
+        
+        // ID 및 생성자 정보 추가
+        newMissions = aiMissions.map((m) => app_mission.Mission(
+          id: const Uuid().v4(),
+          name: (m as app_mission.Mission).name,
+          description: m.description,
+          status: app_mission.MissionStatus.todo,
+          creatorCharacterId: widget.character.id,
+          assignedCharacterIds: [],
+          experienceReward: m.experienceReward,
+        )).toList();
+      } else {
+        // 목업 데이터 사용
+        final aiMissionData = _mockAiService.generateMissions(2);
+        
+        newMissions = aiMissionData.map((data) => app_mission.Mission(
+          id: const Uuid().v4(),
+          name: data['name'] as String,
+          description: data['description'] as String,
+          status: app_mission.MissionStatus.todo,
+          creatorCharacterId: widget.character.id,
+          assignedCharacterIds: [],
+          experienceReward: 50 + (DateTime.now().millisecondsSinceEpoch % 50),
+        )).toList();
+      }
+      
+      // 프로젝트에 미션 추가
+      final projectCopy = _project!.copyWith();
+      
+      // 새로운 미션을 프로젝트 미션 형식으로 변환하여 추가
+      for (final mission in newMissions) {
+        final projectMission = _convertToProjectMission(mission);
+        projectCopy.missions.add(projectMission);
+      }
+      
+      // 프로젝트 업데이트 저장
+      await dataService.updateProject(projectCopy);
+      
+      // 상태 갱신
+      setState(() {
+        _project = projectCopy;
+        _isGeneratingMissions = false;
+      });
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${newMissions.length}개의 새로운 미션이 생성되었습니다'),
+        ),
+      );
+    } catch (e) {
+      _debugPrint('미션 생성 오류: $e');
+      
+      setState(() {
+        _isGeneratingMissions = false;
+      });
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('미션 생성 중 오류가 발생했습니다: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    
+    // 미션 생성 후 튜토리얼 표시
+    final tutorialManager = TutorialManager.instance;
+    if (!tutorialManager.isFeatureTutorialShown('ai_mission_generated')) {
+      tutorialManager.showFeatureTutorial(
+        context: context,
+        featureKey: 'ai_mission_generated',
+        message: 'AI가 미션을 생성했습니다! 이제 이 미션들을 완료하여 경험치를 얻을 수 있습니다.',
+        targetKey: _generateMissionsKey,
+      );
+    }
   }
   
   @override
@@ -479,13 +657,30 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         title: Text(_project?.name ?? '프로젝트 상세'),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadProjectData,
-            tooltip: '새로고침',
+          // OpenAI 스위치
+          Row(
+            children: [
+              const Text('AI 사용', style: TextStyle(fontSize: 12)),
+              Switch(
+                value: _useOpenAI,
+                onChanged: (value) {
+                  setState(() {
+                    _useOpenAI = value;
+                  });
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(_useOpenAI ? 'OpenAI API 사용' : '목업 데이터 사용'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
         bottom: TabBar(
+          key: _tabsKey,
           controller: _tabController,
           tabs: const [
             Tab(text: '개요', icon: Icon(Icons.info_outline)),
@@ -659,27 +854,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   /// 미션 탭 위젯
   Widget _buildMissionsTab() {
     if (_project == null) {
-      return const Center(child: Text('프로젝트 정보를 불러올 수 없습니다'));
-    }
-    
-    if (_project!.missions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.task_alt, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text('아직 미션이 없습니다'),
-            const SizedBox(height: 24),
-            if (_isCharacterOwner)
-              ElevatedButton.icon(
-                onPressed: _showAddMissionDialog,
-                icon: const Icon(Icons.add),
-                label: const Text('미션 추가하기'),
-              ),
-          ],
-        ),
-      );
+      return const Center(child: Text('프로젝트 정보를 불러오는 중...'));
     }
     
     // 미션 상태별로 분류 (프로젝트의 Mission 사용)
@@ -692,6 +867,49 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 미션 헤더 섹션
+          if (widget.project.creatorCharacterId == widget.character.id)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // AI 미션 생성 버튼
+                  ElevatedButton.icon(
+                    key: _generateMissionsKey,
+                    onPressed: _isGeneratingMissions ? null : _generateAdditionalMissions,
+                    icon: _isGeneratingMissions
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.auto_awesome),
+                    label: Text(_isGeneratingMissions ? '생성 중...' : 'AI 미션 생성'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.secondaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  
+                  // 미션 추가 버튼
+                  ElevatedButton.icon(
+                    key: _addMissionKey,
+                    onPressed: _showAddMissionDialog,
+                    icon: const Icon(Icons.add),
+                    label: const Text('미션 추가'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
           // 할 일 미션
           _buildMissionSection('할 일', todoMissions, app_mission.MissionStatus.todo),
           

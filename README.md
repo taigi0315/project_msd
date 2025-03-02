@@ -1,16 +1,53 @@
-# family_choi_app
+# Family Choi Chronicles
 
-A new Flutter project.
+가족 프로젝트 관리 앱 - RPG 요소가 있는 가족 활동 관리 시스템
 
-## Getting Started
+## 주요 기능
 
-This project is a starting point for a Flutter application.
+- 가족 구성원을 RPG 캐릭터로 관리
+- 프로젝트와 미션을 통한 가족 활동 관리
+- 미션 완료 시 경험치 획득 및 레벨업
+- OpenAI API를 활용한 프로젝트 및 미션 생성
+- 게임 효과 시스템으로 시각적/청각적 피드백 제공
 
-A few resources to get you started if this is your first Flutter project:
+## 게임 효과 시스템
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+앱에는 다음과 같은 게임 효과가 포함되어 있습니다:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **레벨업 효과**: 캐릭터가 레벨업할 때 화면에 애니메이션과 사운드 효과 표시
+- **경험치 획득 효과**: 경험치를 획득할 때 화면에 애니메이션 표시
+- **미션 완료 효과**: 미션을 완료할 때 축하 애니메이션 표시
+- **업적 달성 효과**: 업적을 달성할 때 알림 표시
+
+이러한 효과는 `GameEffectsService` 클래스를 통해 관리되며, 사용자 설정에 따라 켜거나 끌 수 있습니다.
+
+## 설치 및 실행
+
+```bash
+# 의존성 설치
+flutter pub get
+
+# 앱 실행
+flutter run
+```
+
+## 환경 설정
+
+`.env` 파일을 프로젝트 루트에 생성하고 다음 내용을 추가하세요:
+
+```
+OPENAI_API_KEY=your_api_key_here
+```
+
+## 사용된 패키지
+
+- `flutter`: 앱 UI 및 기능 구현
+- `provider`: 상태 관리
+- `hive`: 로컬 데이터 저장
+- `openai_dart`: OpenAI API 연동
+- `audioplayers`: 사운드 효과 재생
+- `lottie`: 애니메이션 효과 표시
+
+## 개발자
+
+- 최창익 (Changik Choi)
