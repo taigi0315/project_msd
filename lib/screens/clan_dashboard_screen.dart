@@ -400,7 +400,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                       const SizedBox(height: 4),
                       
                       Text(
-                        'Founded: ${_formatDate(_clan!.foundedAt)}',
+                        'Founded: ${_formatDate(_clan!.createdAt)}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,

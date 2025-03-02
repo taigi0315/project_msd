@@ -27,7 +27,6 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
   bool _isLoading = true;
   bool _isJoining = false;
   String? _errorMessage;
-  List<Clan> _availableClans = [];
   
   // 디버깅 출력
   void _debugPrint(String message) {
@@ -40,8 +39,10 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
     super.initState();
     _debugPrint('초기화 중...');
     
-    // 클랜 목록 로드
-    _loadClans();
+    // 초기화 완료
+    setState(() {
+      _isLoading = false;
+    });
   }
   
   @override
@@ -49,40 +50,6 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
     _inviteCodeController.dispose();
     _debugPrint('리소스 해제됨');
     super.dispose();
-  }
-  
-  /// 클랜 목록 로드
-  Future<void> _loadClans() async {
-    _debugPrint('클랜 목록 로드 중...');
-    
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    
-    try {
-      // 데이터 서비스 가져오기
-      final dataService = Provider.of<MockDataService>(context, listen: false);
-      
-      // 클랜 목록 가져오기
-      final clans = dataService.getAllClans();
-      
-      setState(() {
-        _availableClans = clans;
-      });
-      
-      _debugPrint('${clans.length}개의 클랜 로드됨');
-    } catch (e) {
-      _debugPrint('클랜 로드 오류: $e');
-      
-      setState(() {
-        _errorMessage = '클랜 목록을 불러오는 중 오류가 발생했습니다.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
   
   /// 초대 코드로 클랜 참여
@@ -152,54 +119,6 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
     }
   }
   
-  /// 클랜 참여
-  Future<void> _joinClan(Clan clan) async {
-    _debugPrint('클랜 참여: ${clan.name}');
-    
-    setState(() {
-      _isJoining = true;
-      _errorMessage = null;
-    });
-    
-    try {
-      // 데이터 서비스 가져오기
-      final dataService = Provider.of<MockDataService>(context, listen: false);
-      
-      // 이미 클랜에 가입되어 있는지 확인
-      if (clan.memberIds.contains(widget.character.id)) {
-        _debugPrint('이미 클랜에 가입됨: ${clan.name}');
-        
-        // 대시보드로 이동
-        _navigateToDashboard(clan, widget.character);
-        return;
-      }
-      
-      // 클랜에 캐릭터 추가
-      clan.addMember(widget.character.id);
-      await dataService.updateClan(clan);
-      
-      // 캐릭터에 클랜 연결
-      final updatedCharacter = widget.character.joinClan(clan.id);
-      await dataService.updateCharacter(updatedCharacter);
-      
-      _debugPrint('클랜 가입 완료: ${clan.name}');
-      
-      // 대시보드로 이동
-      if (!mounted) return;
-      _navigateToDashboard(clan, updatedCharacter);
-    } catch (e) {
-      _debugPrint('클랜 참여 오류: $e');
-      
-      setState(() {
-        _errorMessage = '클랜 참여 중 오류가 발생했습니다.';
-      });
-    } finally {
-      setState(() {
-        _isJoining = false;
-      });
-    }
-  }
-  
   /// 클랜 생성 화면으로 이동
   void _navigateToCreateClan() {
     _debugPrint('클랜 생성 화면으로 이동');
@@ -208,10 +127,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
       MaterialPageRoute(
         builder: (context) => CreateClanScreen(character: widget.character),
       ),
-    ).then((_) {
-      // 화면이 돌아오면 클랜 목록 다시 로드
-      _loadClans();
-    });
+    );
   }
   
   /// 클랜 대시보드로 이동
@@ -250,7 +166,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                   const SizedBox(height: 8),
                   
                   Text(
-                    'You can join an existing clan or create a new one.',
+                    'You can join an existing clan with an invite code or create a new one.',
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -297,7 +213,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                           const SizedBox(height: 8),
                           
                           Text(
-                            'If you have an invite code, please enter it.',
+                            'All clans are private. Enter an invite code to join a clan.',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           
@@ -344,138 +260,89 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                     ),
                   ),
                   
-                  // 클랜 생성 버튼
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: ElevatedButton.icon(
-                      onPressed: _navigateToCreateClan,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Create New Clan'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.secondaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                  // 클랜 생성 대안
+                  Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.only(bottom: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'No Invite Code?',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.secondaryColor,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
+                          Text(
+                            'Start your own clan and invite others to join.',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // 클랜 생성 버튼
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _navigateToCreateClan,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Create New Clan'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.secondaryColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 16),
+                  const Spacer(),
                   
-                  // 기존 클랜 목록 헤더
-                  Text(
-                    'Public Clan List',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  // 안내 메시지
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade200),
                     ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // 클랜 목록
-                  Expanded(
-                    child: _availableClans.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No available clans.',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _availableClans.length,
-                            itemBuilder: (context, index) {
-                              final clan = _availableClans[index];
-                              return _buildClanCard(clan);
-                            },
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.blue,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Need an invite code?',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Ask a clan member to share their invite code with you. Each clan has a unique code for security reasons.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-    );
-  }
-  
-  /// 클랜 카드 위젯
-  Widget _buildClanCard(Clan clan) {
-    final isAlreadyMember = clan.memberIds.contains(widget.character.id);
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isAlreadyMember ? AppTheme.primaryColor : Colors.transparent,
-          width: isAlreadyMember ? 2 : 0,
-        ),
-      ),
-      child: InkWell(
-        onTap: () => _joinClan(clan),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              // 클랜 아이콘
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.primaryColor.withOpacity(0.2),
-                ),
-                child: Icon(
-                  Icons.shield,
-                  color: AppTheme.primaryColor,
-                  size: 32,
-                ),
-              ),
-              
-              const SizedBox(width: 16),
-              
-              // 클랜 정보
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      clan.name,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 4),
-                    
-                    Text(
-                      'Members: ${clan.memberIds.length} people',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    
-                    const SizedBox(height: 4),
-                    
-                    Text(
-                      'Projects: ${clan.projectIds.length}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              
-              // 참여 버튼
-              ElevatedButton(
-                onPressed: isAlreadyMember ? () => _navigateToDashboard(clan, widget.character) : () => _joinClan(clan),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isAlreadyMember ? AppTheme.secondaryColor : AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(isAlreadyMember ? 'Enter' : 'Join'),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 } 

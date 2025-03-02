@@ -12,13 +12,9 @@ import 'clan_selection_screen.dart';
 class CharacterQuestionnaireScreen extends StatefulWidget {
   final String userId;
   
-  /// Callback function when character creation is complete
-  final Function(Character character)? onCharacterGenerated;
-  
   const CharacterQuestionnaireScreen({
     super.key, 
     required this.userId,
-    this.onCharacterGenerated,
   });
 
   @override
@@ -195,7 +191,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
         SnackBar(
           content: Text('Oops! Something went wrong: $e'),
           backgroundColor: Colors.red,
-        ),
+        ), 
       );
     }
   }
@@ -297,7 +293,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
                 // Header
                 Center(
                   child: Text(
-                    'BEHOLD! Your D&D Character is Born!',
+                    'BEHOLD! Your Hero is Born!',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primaryColor,
@@ -537,24 +533,14 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
       await dataService.addCharacter(character);
       _debugPrint('Character created: ${character.name}');
       
-      // Call callback if provided
-      if (widget.onCharacterGenerated != null) {
-        widget.onCharacterGenerated!(character);
-        _debugPrint('Character generation callback called');
-        
-        // Return to previous screen
-        if (!mounted) return;
-        Navigator.pop(context);
-      } else {
-        // If no callback, go to clan selection screen
-        if (!mounted) return;
-        
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => ClanSelectionScreen(character: character),
-          ),
-        );
-      }
+      // Always navigate to clan selection screen
+      if (!mounted) return;
+      
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => ClanSelectionScreen(character: character),
+        ),
+      );
     } catch (e) {
       _debugPrint('Character save error: $e');
       
@@ -575,7 +561,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Character Creator 9000'),
+        title: const Text('Create Character'),
         centerTitle: true,
       ),
       body: Stack(

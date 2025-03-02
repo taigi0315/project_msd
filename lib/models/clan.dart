@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'character.dart';
 import 'project.dart';
+import 'package:flutter/foundation.dart';
 
 /// 클랜 모델 클래스
 /// 사용자들이 모여 하나의 클랜을 형성합니다.
@@ -19,7 +20,7 @@ class Clan {
   final DateTime createdAt;
   
   /// 클랜 창설일 (lore용)
-  final DateTime foundedAt;
+  final DateTime? foundedAt;
 
   /// 클랜 리더의 ID
   String leaderId;
@@ -37,7 +38,7 @@ class Clan {
   String inviteCode;
   
   /// 클랜의 공개 여부
-  bool isPrivate;
+  bool isPrivate = true;
 
   /// 디버깅을 위한 출력
   void _debugPrint(String message) {
@@ -57,7 +58,6 @@ class Clan {
     String? inviteCode,
     DateTime? createdAt,
     DateTime? foundedAt,
-    this.isPrivate = false,
   }) : 
     id = id ?? const Uuid().v4(),
     memberIds = memberIds ?? [leaderId],
@@ -65,6 +65,9 @@ class Clan {
     inviteCode = inviteCode ?? _generateInviteCode(),
     createdAt = createdAt ?? DateTime.now(),
     foundedAt = foundedAt ?? DateTime.now() {
+    // isPrivate 매개변수는 무시됩니다 - 항상 true입니다
+    this.isPrivate = true;
+    
     _debugPrint('New clan created: $name (ID: $id)');
   }
 
@@ -146,7 +149,7 @@ class Clan {
       'name': name,
       'description': description,
       'createdAt': createdAt.toIso8601String(),
-      'foundedAt': foundedAt.toIso8601String(),
+      'foundedAt': foundedAt?.toIso8601String(),
       'leaderId': leaderId,
       'founderCharacterId': founderCharacterId,
       'memberIds': memberIds,
@@ -163,13 +166,12 @@ class Clan {
       name: json['name'] as String,
       description: json['description'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      foundedAt: DateTime.parse(json['foundedAt'] as String),
+      foundedAt: json['foundedAt'] != null ? DateTime.parse(json['foundedAt'] as String) : null,
       leaderId: json['leaderId'] as String,
       founderCharacterId: json['founderCharacterId'] as String,
       memberIds: List<String>.from(json['memberIds']),
       projectIds: List<String>.from(json['projectIds']),
       inviteCode: json['inviteCode'] as String,
-      isPrivate: json['isPrivate'] as bool,
     );
   }
 } 
