@@ -125,7 +125,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('프로젝트 설명을 입력해주세요'),
+          content: Text('Please enter a project description'),
         ),
       );
       return;
@@ -154,7 +154,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('프로젝트 이름이 생성되었습니다: $projectName'),
+          content: Text('Project name generated: $projectName'),
         ),
       );
     } catch (e) {
@@ -162,7 +162,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('프로젝트 이름 생성 중 오류가 발생했습니다: $e'),
+          content: Text('Error generating project name: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -178,7 +178,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     if (_nameController.text.trim().isEmpty || _descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('프로젝트 이름과 설명을 모두 입력해주세요'),
+          content: Text('Please enter both project name and description'),
         ),
       );
       return;
@@ -229,7 +229,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${newMissions.length}개의 미션이 생성되었습니다'),
+          content: Text('${newMissions.length} missions created'),
         ),
       );
     } catch (e) {
@@ -238,7 +238,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('미션 생성 중 오류가 발생했습니다: $e'),
+          content: Text('Error generating missions: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -254,7 +254,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     if (_nameController.text.trim().isEmpty || _descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('프로젝트 이름과 설명을 모두 입력해주세요'),
+          content: Text('Please enter both project name and description'),
         ),
       );
       return;
@@ -281,7 +281,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${_achievements.length}개의 업적이 생성되었습니다'),
+          content: Text('${_achievements.length} achievements created'),
         ),
       );
     } catch (e) {
@@ -290,7 +290,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('업적 생성 중 오류가 발생했습니다: $e'),
+          content: Text('Error generating achievements: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -338,13 +338,13 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('미션이 삭제되었습니다: ${mission.name}'),
+        content: Text('Mission deleted: ${mission.name}'),
         action: SnackBarAction(
-          label: '실행 취소',
+          label: 'Undo',
           onPressed: () {
             setState(() {
               _missions.add(mission);
-              _debugPrint('미션 삭제 실행 취소: ${mission.name}');
+              _debugPrint('Mission deletion undone: ${mission.name}');
             });
           },
         ),
@@ -364,16 +364,16 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       final shouldContinue = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('미션 없음'),
-          content: const Text('미션이 없는 프로젝트를 생성하시겠습니까?'),
+          title: const Text('No missions'),
+          content: const Text('Do you want to create a project with no missions?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('계속'),
+              child: const Text('Continue'),
             ),
           ],
         ),
@@ -387,7 +387,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
     
-    _debugPrint('프로젝트 생성 시도: $name');
+    _debugPrint('Project creation attempt: $name');
     
     setState(() {
       _isLoading = true;
@@ -427,21 +427,21 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         
         // 성공 메시지 표시 및 화면 닫기
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로젝트가 성공적으로 생성되었습니다!')),
+          const SnackBar(content: Text('Project created successfully!')),
         );
         
         Navigator.pop(context, newProject);
       }).catchError((error) {
         setState(() {
           _isLoading = false;
-          _errorMessage = '프로젝트 생성 중 오류가 발생했습니다: $error';
+          _errorMessage = 'Error creating project: $error';
         });
       });
     } catch (e) {
-      _debugPrint('프로젝트 생성 오류: $e');
+      _debugPrint('Project creation error: $e');
       
       setState(() {
-        _errorMessage = '프로젝트 생성 중 오류가 발생했습니다: $e';
+        _errorMessage = 'Error creating project: $e';
       });
     } finally {
       setState(() {
@@ -455,13 +455,13 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('새 프로젝트 생성'),
+        title: const Text('Create New Project'),
         centerTitle: true,
         actions: [
           // OpenAI API 스위치
           Row(
             children: [
-              const Text('AI 사용', style: TextStyle(fontSize: 12)),
+              const Text('Use AI', style: TextStyle(fontSize: 12)),
               Switch(
                 value: _useOpenAI,
                 onChanged: (value) {
@@ -471,7 +471,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                   
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(_useOpenAI ? 'OpenAI API 사용' : '목업 데이터 사용'),
+                      content: Text(_useOpenAI ? 'Using OpenAI API' : 'Using mock data'),
                       duration: const Duration(seconds: 1),
                     ),
                   );
@@ -492,7 +492,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                   children: [
                     // 상단 제목
                     const Text(
-                      '새로운 모험을 시작하세요',
+                      'Start a new adventure',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -503,7 +503,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     const SizedBox(height: 8),
                     
                     Text(
-                      '클랜의 새 프로젝트를 생성하고 미션을 추가하세요',
+                      'Create a new project for your clan and add missions',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -542,7 +542,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              '프로젝트 정보',
+                              'Project Information',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -559,8 +559,8 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                   child: TextFormField(
                                     controller: _nameController,
                                     decoration: InputDecoration(
-                                      labelText: '프로젝트 이름',
-                                      hintText: '프로젝트의 이름을 입력하세요',
+                                      labelText: 'Project Name',
+                                      hintText: 'Enter the name of the project',
                                       prefixIcon: const Icon(Icons.folder, color: AppTheme.primaryColor),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -568,10 +568,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                     ),
                                     validator: (value) {
                                       if (value == null || value.trim().isEmpty) {
-                                        return '프로젝트 이름을 입력해주세요';
+                                        return 'Please enter a project name';
                                       }
                                       if (value.length < 3) {
-                                        return '프로젝트 이름은 최소 3글자 이상이어야 합니다';
+                                        return 'Project name must be at least 3 characters';
                                       }
                                       return null;
                                     },
@@ -590,7 +590,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                           child: CircularProgressIndicator(strokeWidth: 2),
                                         )
                                       : const Icon(Icons.autorenew),
-                                  tooltip: '랜덤 이름 생성',
+                                  tooltip: 'Generate random name',
                                   color: AppTheme.primaryColor,
                                 ),
                               ],
@@ -602,8 +602,8 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                             TextFormField(
                               controller: _descriptionController,
                               decoration: InputDecoration(
-                                labelText: '프로젝트 설명',
-                                hintText: '프로젝트에 대한 설명을 입력하세요',
+                                labelText: 'Project Description',
+                                hintText: 'Enter a description for the project',
                                 prefixIcon: const Icon(Icons.description, color: AppTheme.primaryColor),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -612,10 +612,10 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                               maxLines: 3,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return '프로젝트 설명을 입력해주세요';
+                                  return 'Please enter a project description';
                                 }
                                 if (value.length < 10) {
-                                  return '프로젝트 설명은 최소 10글자 이상이어야 합니다';
+                                  return 'Project description must be at least 10 characters';
                                 }
                                 return null;
                               },
@@ -634,7 +634,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            '업적',
+                            'Achievements',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -649,7 +649,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
                                 : const Icon(Icons.auto_awesome),
-                            label: const Text('업적 생성'),
+                            label: const Text('Generate Achievements'),
                           ),
                         ],
                       ),
@@ -718,7 +718,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          '미션',
+                          'Missions',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -735,7 +735,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.auto_awesome),
-                          label: const Text('자동 생성'),
+                          label: const Text('Auto-generate'),
                         ),
                       ],
                     ),
@@ -756,7 +756,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                               const SizedBox(height: 16),
                               
                               Text(
-                                '미션이 없습니다',
+                                'No missions',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -766,7 +766,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                               const SizedBox(height: 8),
                               
                               Text(
-                                '미션을 추가하거나 자동으로 생성해보세요',
+                                'Add missions or auto-generate them',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey[500],
@@ -793,7 +793,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                       child: OutlinedButton.icon(
                         onPressed: _addMission,
                         icon: const Icon(Icons.add),
-                        label: const Text('미션 추가'),
+                        label: const Text('Add Mission'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -814,7 +814,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                         ),
                       ),
                       child: const Text(
-                        '프로젝트 생성하기',
+                        'Create Project',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -827,7 +827,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                     // 취소 버튼
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('취소'),
+                      child: const Text('Cancel'),
                     ),
                   ],
                 ),
@@ -999,7 +999,7 @@ class _MissionDialogState extends State<_MissionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('미션 추가'),
+      title: const Text('Add Mission'),
       content: Form(
         key: _formKey,
         child: Column(
@@ -1009,12 +1009,12 @@ class _MissionDialogState extends State<_MissionDialog> {
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: '미션 이름',
-                hintText: '미션의 이름을 입력하세요',
+                labelText: 'Mission Name',
+                hintText: 'Enter the name of the mission',
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return '미션 이름을 입력해주세요';
+                  return 'Please enter a mission name';
                 }
                 return null;
               },
@@ -1026,8 +1026,8 @@ class _MissionDialogState extends State<_MissionDialog> {
             TextFormField(
               controller: _descriptionController,
               decoration: const InputDecoration(
-                labelText: '미션 설명',
-                hintText: '미션에 대한 설명을 입력하세요',
+                labelText: 'Mission Description',
+                hintText: 'Enter a description for the mission',
               ),
               maxLines: 2,
             ),
@@ -1037,7 +1037,7 @@ class _MissionDialogState extends State<_MissionDialog> {
             // 경험치 보상
             Row(
               children: [
-                const Text('경험치 보상:'),
+                const Text('Experience Reward:'),
                 
                 Expanded(
                   child: Slider(
@@ -1065,11 +1065,11 @@ class _MissionDialogState extends State<_MissionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('취소'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _handleAdd,
-          child: const Text('추가'),
+          child: const Text('Add'),
         ),
       ],
     );
