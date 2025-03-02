@@ -767,17 +767,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
-                    '생성일',
+                    'Created',
                     _formatDate(_project!.createdAt),
                     Icons.calendar_today,
                   ),
                   _buildInfoRow(
-                    '상태',
+                    'Status',
                     _getProjectStatusText(),
                     Icons.sync,
                   ),
                   _buildInfoRow(
-                    '미션',
+                    'Missions',
                     '$completedMissions / $totalMissions',
                     Icons.task_alt,
                   ),
@@ -798,7 +798,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '프로젝트 진행률',
+                    'Project Progress',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -831,7 +831,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '최근 활동',
+                    'Recent Activity',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
@@ -839,7 +839,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Text('최근 활동 내역이 없습니다'),
+                      child: Text('No recent activity'),
                     ),
                   ),
                 ],
@@ -854,7 +854,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   /// 미션 탭 위젯
   Widget _buildMissionsTab() {
     if (_project == null) {
-      return const Center(child: Text('프로젝트 정보를 불러오는 중...'));
+      return const Center(child: Text('Loading project information...'));
     }
     
     // 미션 상태별로 분류 (프로젝트의 Mission 사용)
@@ -888,7 +888,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                             ),
                           )
                         : const Icon(Icons.auto_awesome),
-                    label: Text(_isGeneratingMissions ? '생성 중...' : 'AI 미션 생성'),
+                    label: Text(_isGeneratingMissions ? 'Generating...' : 'Generate AI Missions'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.secondaryColor,
                       foregroundColor: Colors.white,
@@ -900,7 +900,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                     key: _addMissionKey,
                     onPressed: _showAddMissionDialog,
                     icon: const Icon(Icons.add),
-                    label: const Text('미션 추가'),
+                    label: const Text('Add Mission'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       foregroundColor: Colors.white,
@@ -911,17 +911,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
             ),
           
           // 할 일 미션
-          _buildMissionSection('할 일', todoMissions, app_mission.MissionStatus.todo),
+          _buildMissionSection('To Do', todoMissions, app_mission.MissionStatus.todo),
           
           const SizedBox(height: 16),
           
           // 진행 중 미션
-          _buildMissionSection('진행 중', inProgressMissions, app_mission.MissionStatus.inProgress),
+          _buildMissionSection('In Progress', inProgressMissions, app_mission.MissionStatus.inProgress),
           
           const SizedBox(height: 16),
           
           // 완료된 미션
-          _buildMissionSection('완료됨', completedMissions, app_mission.MissionStatus.completed),
+          _buildMissionSection('Completed', completedMissions, app_mission.MissionStatus.completed),
         ],
       ),
     );
@@ -960,7 +960,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         if (missions.isEmpty)
           const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: Text('미션이 없습니다')),
+            child: Center(child: Text('No missions')),
           )
         else
           ...missions.map((mission) => _buildMissionCard(mission)),
@@ -1142,7 +1142,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   /// 멤버 탭 위젯
   Widget _buildMembersTab() {
     if (_assignedMembers.isEmpty) {
-      return const Center(child: Text('프로젝트에 할당된 멤버가 없습니다'));
+      return const Center(child: Text('No members assigned to the project'));
     }
     
     return ListView.builder(
@@ -1166,7 +1166,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
             subtitle: Text('Lv.${member.level} ${member.specialty.displayName}'),
             trailing: member.id == _project!.creatorCharacterId
                 ? const Chip(
-                    label: Text('생성자'),
+                    label: Text('Creator'),
                     backgroundColor: AppTheme.secondaryColor,
                     labelStyle: TextStyle(color: Colors.white),
                   )
@@ -1204,20 +1204,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   /// 프로젝트 상태 텍스트 반환
   String _getProjectStatusText() {
     if (_project == null) {
-      return '알 수 없음';
+      return 'Unknown';
     }
     
     final completedMissions = _project!.missions.where((m) => m.status == app_mission.MissionStatus.completed).length;
     final totalMissions = _project!.missions.length;
     
     if (totalMissions == 0) {
-      return '시작 전';
+      return 'Before Start';
     } else if (completedMissions == totalMissions) {
-      return '완료됨';
+      return 'Completed';
     } else if (completedMissions == 0) {
-      return '시작됨';
+      return 'Started';
     } else {
-      return '진행 중';
+      return 'In Progress';
     }
   }
   
@@ -1225,13 +1225,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   String _getMissionStatusText(app_mission.MissionStatus status) {
     switch (status) {
       case app_mission.MissionStatus.todo:
-        return '할 일';
+        return 'To Do';
       case app_mission.MissionStatus.inProgress:
-        return '진행 중';
+        return 'In Progress';
       case app_mission.MissionStatus.completed:
-        return '완료됨';
+        return 'Completed';
       default:
-        return '알 수 없음';
+        return 'Unknown';
     }
   }
   

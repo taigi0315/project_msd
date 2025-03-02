@@ -400,7 +400,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                       const SizedBox(height: 4),
                       
                       Text(
-                        '창설: ${_formatDate(_clan!.foundedAt)}',
+                        'Founded: ${_formatDate(_clan!.foundedAt)}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
@@ -417,12 +417,12 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                     // 초대 코드 복사 기능 (클립보드 액세스 필요)
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('초대 코드가 복사되었습니다: ${_clan!.inviteCode}'),
+                        content: Text('Invite code copied: ${_clan!.inviteCode}'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
                   },
-                  tooltip: '초대 코드 복사',
+                  tooltip: 'Copy Invite Code',
                 ),
               ],
             ),
@@ -444,19 +444,19 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                 _buildStatItem(
                   Icons.people,
                   '${_clan!.memberIds.length}',
-                  '멤버',
+                  'Members',
                 ),
                 
                 _buildStatItem(
                   Icons.folder,
                   '${_clan!.projectIds.length}',
-                  '프로젝트',
+                  'Projects',
                 ),
                 
                 _buildStatItem(
                   Icons.task_alt,
                   '0',
-                  '완료한 미션',
+                  'Completed Missions',
                 ),
               ],
             ),
@@ -565,7 +565,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                   const SizedBox(width: 4),
                   
                   Text(
-                    '미션: $completedMissions/$totalMissions',
+                    'Missions: $completedMissions/$totalMissions',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
@@ -605,7 +605,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
             const SizedBox(height: 16),
             
             const Text(
-              '아직 프로젝트가 없습니다',
+              'No projects yet',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -616,7 +616,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
             const SizedBox(height: 8),
             
             Text(
-              '첫 번째 프로젝트를 만들어 모험을 시작하세요!',
+              'Create your first project to start your adventure!',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -629,7 +629,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
             ElevatedButton.icon(
               onPressed: _navigateToCreateProject,
               icon: const Icon(Icons.add),
-              label: const Text('새 프로젝트 추가'),
+              label: const Text('Add New Project'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
@@ -659,13 +659,13 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '클랜 멤버',
+              'Clan Members',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
             if (_clan!.memberIds.isEmpty)
               const Center(
-                child: Text('클랜에 멤버가 없습니다.'),
+                child: Text('No members in the clan.'),
               )
             else
               ListView.builder(
@@ -678,7 +678,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                   final character = _mockDataService.getCharacterById(characterId);
                   if (character == null) {
                     return const ListTile(
-                      title: Text('알 수 없는 캐릭터'),
+                      title: Text('Unknown character'),
                     );
                   }
                   
@@ -693,7 +693,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                         ),
                       ),
                       title: Text(character.name),
-                      subtitle: Text('레벨 ${character.level} ${character.specialty.displayName}'),
+                      subtitle: Text('Level ${character.level} ${character.specialty.displayName}'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () => _navigateToCharacterProfile(character),
                     ),

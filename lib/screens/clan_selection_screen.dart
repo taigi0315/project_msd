@@ -92,7 +92,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
     final inviteCode = _inviteCodeController.text.trim();
     if (inviteCode.isEmpty) {
       setState(() {
-        _errorMessage = '초대 코드를 입력해주세요.';
+        _errorMessage = 'Please enter an invite code.';
       });
       return;
     }
@@ -112,7 +112,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
       if (clan == null) {
         _debugPrint('유효하지 않은 초대 코드: $inviteCode');
         setState(() {
-          _errorMessage = '유효하지 않은 초대 코드입니다.';
+          _errorMessage = 'Invalid invite code.';
         });
         return;
       }
@@ -230,7 +230,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('클랜 선택'),
+        title: const Text('Select Clan'),
         centerTitle: true,
       ),
       body: _isLoading
@@ -242,7 +242,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                 children: [
                   // 상단 헤더
                   Text(
-                    '클랜에 가입하여 모험을 시작하세요',
+                    'Join a clan and start your adventure',
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
@@ -250,7 +250,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                   const SizedBox(height: 8),
                   
                   Text(
-                    '기존 클랜에 참여하거나 새로운 클랜을 창설할 수 있습니다.',
+                    'You can join an existing clan or create a new one.',
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -287,7 +287,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '초대 코드로 참여',
+                            'Join by Invite Code',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.primaryColor,
@@ -297,7 +297,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                           const SizedBox(height: 8),
                           
                           Text(
-                            '클랜 초대 코드가 있다면 입력하세요.',
+                            'If you have an invite code, please enter it.',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           
@@ -309,7 +309,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                                 child: TextField(
                                   controller: _inviteCodeController,
                                   decoration: InputDecoration(
-                                    hintText: '초대 코드 입력',
+                                    hintText: 'Enter Invite Code',
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -335,7 +335,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text('참여'),
+                                    : const Text('Join'),
                               ),
                             ],
                           ),
@@ -350,7 +350,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _navigateToCreateClan,
                       icon: const Icon(Icons.add),
-                      label: const Text('새 클랜 창설하기'),
+                      label: const Text('Create New Clan'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.secondaryColor,
                         foregroundColor: Colors.white,
@@ -363,7 +363,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                   
                   // 기존 클랜 목록 헤더
                   Text(
-                    '공개 클랜 목록',
+                    'Public Clan List',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -376,7 +376,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                     child: _availableClans.isEmpty
                         ? Center(
                             child: Text(
-                              '참여 가능한 클랜이 없습니다.',
+                              'No available clans.',
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 color: Colors.grey,
                                 fontStyle: FontStyle.italic,
@@ -449,14 +449,14 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                     const SizedBox(height: 4),
                     
                     Text(
-                      '멤버: ${clan.memberIds.length}명',
+                      'Members: ${clan.memberIds.length} people',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     
                     const SizedBox(height: 4),
                     
                     Text(
-                      '프로젝트: ${clan.projectIds.length}개',
+                      'Projects: ${clan.projectIds.length}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
@@ -470,7 +470,7 @@ class _ClanSelectionScreenState extends State<ClanSelectionScreen> {
                   backgroundColor: isAlreadyMember ? AppTheme.secondaryColor : AppTheme.primaryColor,
                   foregroundColor: Colors.white,
                 ),
-                child: Text(isAlreadyMember ? '입장' : '참여'),
+                child: Text(isAlreadyMember ? 'Enter' : 'Join'),
               ),
             ],
           ),

@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _debugPrint('Initializing...');
     
     // 애니메이션 컨트롤러 설정
     _controller = AnimationController(
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     // 3초 후 다음 화면으로 이동
     Timer(const Duration(seconds: 3), () {
-      _debugPrint('다음 화면으로 이동 중...');
+      _debugPrint('Moving to next screen...');
       _checkTutorialStatus();
     });
   }
@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void dispose() {
     _controller.dispose();
-    _debugPrint('리소스 해제됨');
+    _debugPrint('Resources released');
     super.dispose();
   }
   
@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await tutorialManager.initialize();
     
     final shouldShowTutorial = await tutorialManager.shouldShowAppTutorial();
-    _debugPrint('튜토리얼 표시 여부: $shouldShowTutorial');
+    _debugPrint('Should show tutorial: $shouldShowTutorial');
     
     if (shouldShowTutorial) {
       // 튜토리얼을 아직 완료하지 않았으면 튜토리얼 표시
@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    _debugPrint('빌드 중...');
+    _debugPrint('Building...');
     
     // 화면 비율 계산
     final screenHeight = MediaQuery.of(context).size.height;
@@ -194,7 +194,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       Opacity(
                         opacity: _opacityAnimation.value,
                         child: Text(
-                          '일상을 모험으로, 과제를 퀘스트로',
+                          'Turn your daily life into adventure, tasks into quests',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: AppTheme.textColor,
                             fontStyle: FontStyle.italic,

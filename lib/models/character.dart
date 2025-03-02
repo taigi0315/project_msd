@@ -78,17 +78,17 @@ class Character {
   String? dndSpecialty;
   List<String>? dndSkills;
   
-  // 간편하게 경험치 포인트에 접근
+  // Easy access to experience points
   int get experiencePoints => experience;
   
-  // 캐릭터의 스킬을 가져오는 메소드 (외부에서 구현해야 함)
+  // Method to get character skills (must be implemented externally)
   List<Skill> get skills {
-    // 기본 스킬 중에서 이 캐릭터의 스킬 ID에 해당하는 것들만 반환
-    // 실제 구현에서는 데이터베이스에서 가져와야 하지만 임시로 더미 데이터 반환
+    // Returns skills from default skills that match this character's skill IDs
+    // In a real implementation, this would fetch from a database, but returning dummy data for now
     final defaultSkills = Skill.createDefaultSkills();
     if (skillIds.isEmpty) return [];
     
-    // 실제로는 ID에 맞는 스킬을 찾아야 하지만, 지금은 간단히 처음 몇개만 반환
+    // In reality, we should find skills matching the IDs, but for now just return the first few
     return defaultSkills.take(skillIds.length).toList();
   }
   
@@ -184,20 +184,20 @@ class Character {
     return copyWith(skillIds: newSkillIds);
   }
   
-  /// 경험치를 추가하고 레벨업 처리 (gainExperience)
+  /// Add experience and handle level up process
   Future<bool> gainExperience(int amount) async {
     if (amount <= 0) return false;
     
     experience += amount;
     bool leveledUp = false;
     
-    // 레벨업 처리
+    // Level up processing
     while (experience >= experienceToNextLevel) {
       experience -= experienceToNextLevel;
       level++;
       leveledUp = true;
       
-      // 레벨업 효과음 및 애니메이션
+      // Level up sound and animation
       if (leveledUp) {
         GameEffectsService().playSound(GameSound.levelUp);
       }
@@ -206,8 +206,7 @@ class Character {
     return leveledUp;
   }
   
-  /// 경험치를 추가하고 레벨업 처리 (addExperience)
-  /// (backward compatibility)
+  /// Add experience and handle level up process (backward compatibility)
   Future<bool> addExperience(int amount) async {
     return gainExperience(amount);
   }
@@ -221,12 +220,12 @@ class Character {
     );
   }
   
-  /// 캐릭터를 클랜에 가입시킵니다
+  /// Make character join a clan
   Character joinClan(String newClanId) {
     return copyWith(clanId: newClanId);
   }
   
-  /// 캐릭터를 클랜에서 탈퇴시킵니다
+  /// Remove character from clan
   Character leaveClan() {
     return copyWith(clanId: null);
   }
@@ -277,7 +276,7 @@ class Character {
     );
   }
   
-  /// 문자열에서 CharacterSpecialty 열거형으로 변환하는 도우미 메소드
+  /// Helper method to convert string to CharacterSpecialty enum
   static CharacterSpecialty _specialtyFromString(String typeStr) {
     switch (typeStr) {
       case 'leader': return CharacterSpecialty.leader;

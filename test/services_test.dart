@@ -7,10 +7,10 @@ import 'package:family_choi_app/models/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
-// Mocks 생성
+// Generate mocks
 @GenerateMocks([OpenAIService])
 void main() {
-  group('MockDataService 테스트', () {
+  group('MockDataService Tests', () {
     late MockDataService dataService;
     
     setUp(() async {
@@ -18,47 +18,47 @@ void main() {
       await dataService.initialize();
     });
     
-    test('캐릭터 생성 및 경험치 계산 테스트', () async {
-      // 캐릭터 생성
+    test('Character creation and experience calculation test', () async {
+      // Create character
       final character = Character(
-        name: '테스트 캐릭터',
+        name: 'Test Character',
         userId: 'test_user_id',
         specialty: CharacterSpecialty.warrior,
-        battleCry: '테스트를 위한 전투 구호!',
+        battleCry: 'Battle cry for testing!',
       );
       
-      // 초기 경험치 확인
+      // Check initial experience
       expect(character.level, 1);
       expect(character.totalExperience, 0);
       expect(character.experienceToNextLevel, 100);
       
-      // 경험치 추가
+      // Add experience
       await character.gainExperience(50);
       expect(character.totalExperience, 50);
       expect(character.experienceToNextLevel, 50);
       expect(character.level, 1);
       
-      // 레벨업을 위한 경험치 추가
+      // Add experience for level up
       await character.gainExperience(50);
       expect(character.totalExperience, 100);
       expect(character.level, 2);
-      expect(character.experienceToNextLevel, 200); // 새로운 레벨에 맞게 요구 경험치 증가
+      expect(character.experienceToNextLevel, 200); // Experience requirement increases for new level
     });
     
-    test('미션 생성 및 상태 변경 테스트', () {
-      // 미션 생성
+    test('Mission creation and status change test', () {
+      // Create mission
       final mission = Mission(
-        name: '테스트 미션',
-        description: '이것은 테스트 미션입니다',
+        name: 'Test Mission',
+        description: 'This is a test mission',
         experienceReward: 100,
         status: MissionStatus.todo,
         creatorCharacterId: 'test_character_id',
       );
       
-      // 초기 상태 확인
+      // Check initial status
       expect(mission.status, MissionStatus.todo);
       
-      // 상태 변경
+      // Change status
       mission.startMission('test_character_id');
       expect(mission.status, MissionStatus.inProgress);
       
@@ -66,23 +66,23 @@ void main() {
       expect(mission.status, MissionStatus.completed);
     });
     
-    test('프로젝트에 미션 추가 테스트', () {
-      // 프로젝트 생성
+    test('Adding missions to project test', () {
+      // Create project
       final project = Project(
-        name: '테스트 프로젝트',
-        description: '이것은 테스트 프로젝트입니다',
-        goals: ['테스트 목표 1', '테스트 목표 2'],
+        name: 'Test Project',
+        description: 'This is a test project',
+        goals: ['Test Goal 1', 'Test Goal 2'],
         creatorCharacterId: 'test_character_id',
         clanId: 'test_clan_id',
       );
       
-      // 초기 미션 수 확인
+      // Check initial mission count
       expect(project.missions.length, 0);
       
-      // 미션 추가
+      // Add mission
       final mission = Mission(
-        name: '테스트 미션',
-        description: '이것은 테스트 미션입니다',
+        name: 'Test Mission',
+        description: 'This is a test mission',
         experienceReward: 100,
         status: MissionStatus.todo,
         creatorCharacterId: 'test_character_id',
@@ -90,11 +90,11 @@ void main() {
       
       project.addMission(mission);
       expect(project.missions.length, 1);
-      expect(project.missions.first.name, '테스트 미션');
+      expect(project.missions.first.name, 'Test Mission');
     });
   });
   
-  group('OpenAIService 테스트 (목업 모드)', () {
+  group('OpenAIService Tests (Mock Mode)', () {
     late OpenAIService openAIService;
     
     setUp(() async {
@@ -102,15 +102,15 @@ void main() {
       await openAIService.initialize();
     });
     
-    test('프로젝트 이름 생성 테스트', () async {
-      final projectName = await openAIService.generateProjectName('가족 역사 기록하기');
+    test('Project name generation test', () async {
+      final projectName = await openAIService.generateProjectName('Family History Recording');
       expect(projectName.isNotEmpty, true);
     });
     
-    test('미션 생성 테스트', () async {
+    test('Mission generation test', () async {
       final missions = await openAIService.generateMissions(
-        '가족 역사 기록하기',
-        '가족 연대기 프로젝트',
+        'Family History Recording',
+        'Family Chronicles Project',
         3
       );
       
@@ -121,10 +121,10 @@ void main() {
       expect(missions[0].experienceReward! > 0, true);
     });
     
-    test('업적 생성 테스트', () async {
+    test('Achievement generation test', () async {
       final achievements = await openAIService.generateAchievements(
-        '가족 역사 기록하기',
-        '가족 연대기 프로젝트'
+        'Family History Recording',
+        'Family Chronicles Project'
       );
       
       expect(achievements.length, 3);
@@ -132,7 +132,7 @@ void main() {
       expect(achievements[0].description.isNotEmpty, true);
       expect(achievements[0].experienceReward > 0, true);
       
-      // 첫 번째 업적은 자동으로 해제됨
+      // First achievement is automatically unlocked
       expect(achievements[0].isUnlocked, true);
       expect(achievements[1].isUnlocked, false);
     });

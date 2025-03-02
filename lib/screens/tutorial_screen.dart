@@ -24,38 +24,38 @@ class _TutorialScreenState extends State<TutorialScreen> {
   // 튜토리얼 페이지 데이터
   final List<TutorialPage> _pages = [
     TutorialPage(
-      title: '가족 프로젝트 앱에 오신 것을 환영합니다!',
-      description: '이 앱은 가족 프로젝트를 관리하고 재미있게 수행할 수 있도록 도와줍니다. RPG 게임처럼 미션을 완료하고 경험치를 얻어 성장해보세요.',
+      title: 'Welcome to the Family Project App!',
+      description: 'This app helps you manage family projects in a fun way. Like RPG games, complete missions to earn experience points and grow.',
       imagePath: 'assets/images/tutorial_welcome.png',
       icon: Icons.flight_takeoff,
     ),
     TutorialPage(
-      title: '캐릭터 생성하기',
-      description: '자신만의 캐릭터를 만들고 특성을 선택하세요. 각 특성은 다른 능력을 가지고 있으며, 플레이 스타일에 영향을 줍니다.',
+      title: 'Create Your Character',
+      description: 'Create your own character and choose your specialty. Each specialty has different abilities that affect your play style.',
       imagePath: 'assets/images/tutorial_character.png',
       icon: Icons.person,
     ),
     TutorialPage(
-      title: '클랜 가입하기',
-      description: '가족 클랜을 만들거나 가입하세요. 클랜 멤버들과 함께 프로젝트를 수행하고 가족의 역사를 만들어갑니다.',
+      title: 'Join a Clan',
+      description: 'Create or join a family clan. Work together with clan members on projects and create family history.',
       imagePath: 'assets/images/tutorial_clan.png',
       icon: Icons.people,
     ),
     TutorialPage(
-      title: '프로젝트 생성하기',
-      description: 'AI의 도움을 받아 창의적인 프로젝트를 만들고, 미션과 업적을 설정하세요. 각 미션은 경험치를 제공합니다.',
+      title: 'Create Projects',
+      description: 'Create creative projects with AI assistance, and set missions and achievements. Each mission provides experience points.',
       imagePath: 'assets/images/tutorial_project.png',
       icon: Icons.assignment,
     ),
     TutorialPage(
-      title: '미션 완료하기',
-      description: '미션을 완료하면 경험치를 얻고 레벨업할 수 있습니다. 레벨업하면 스킬이 향상되고 새로운 능력을 얻을 수 있습니다.',
+      title: 'Complete Missions',
+      description: 'Complete missions to earn experience points and level up. When you level up, your skills improve and you gain new abilities.',
       imagePath: 'assets/images/tutorial_mission.png',
       icon: Icons.task_alt,
     ),
     TutorialPage(
-      title: '준비 완료!',
-      description: '이제 Family Choi Chronicles를 시작할 준비가 되었습니다. 가족과 함께 재미있는 모험을 떠나보세요!',
+      title: 'Ready to Go!',
+      description: 'Now you\'re ready to start Family Choi Chronicles. Embark on an exciting adventure with your family!',
       imagePath: 'assets/images/tutorial_ready.png',
       icon: Icons.celebration,
     ),
@@ -69,10 +69,10 @@ class _TutorialScreenState extends State<TutorialScreen> {
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _debugPrint('Initializing...');
     
     // 튜토리얼 시작 로그
-    _debugPrint('튜토리얼 시작: 총 ${_pages.length}개 페이지');
+    _debugPrint('Tutorial started: ${_pages.length} pages total');
     
     // 마지막으로 본 페이지 인덱스 로드
     _loadLastPage();
@@ -91,7 +91,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         _pageController.jumpToPage(lastPage);
       }
     } catch (e) {
-      _debugPrint('마지막 페이지 로드 중 오류 발생: $e');
+      _debugPrint('Error loading last page: $e');
     }
   }
   
@@ -101,13 +101,13 @@ class _TutorialScreenState extends State<TutorialScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('tutorial_last_page', page);
     } catch (e) {
-      _debugPrint('마지막 페이지 저장 중 오류 발생: $e');
+      _debugPrint('Error saving last page: $e');
     }
   }
   
   /// 튜토리얼 완료
   void _completeTutorial() async {
-    _debugPrint('튜토리얼 완료');
+    _debugPrint('Tutorial completed');
     
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -117,7 +117,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
         widget.onComplete!();
       }
     } catch (e) {
-      _debugPrint('튜토리얼 완료 상태 저장 중 오류 발생: $e');
+      _debugPrint('Error saving tutorial completion status: $e');
     }
   }
   
@@ -145,14 +145,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
   
   /// 건너뛰기
   void _skipTutorial() {
-    _debugPrint('튜토리얼 건너뛰기');
+    _debugPrint('Skipping tutorial');
     _completeTutorial();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _debugPrint('리소스 해제됨');
+    _debugPrint('Resources released');
     super.dispose();
   }
   
@@ -173,7 +173,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                   TextButton(
                     onPressed: _skipTutorial,
                     child: const Text(
-                      '건너뛰기',
+                      'Skip',
                       style: TextStyle(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.bold,
@@ -326,7 +326,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       ),
                     ),
                     child: Text(
-                      _currentPage < _pages.length - 1 ? '다음' : '시작하기',
+                      _currentPage < _pages.length - 1 ? 'Next' : 'Start',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),

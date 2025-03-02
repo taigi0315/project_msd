@@ -45,7 +45,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _debugPrint('Initializing...');
     
     _aiService = MockAIService();
     
@@ -63,13 +63,13 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _debugPrint('리소스 해제됨');
+    _debugPrint('Resources released');
     super.dispose();
   }
   
   /// 클랜 이름 랜덤 생성
   Future<void> _generateRandomClanName() async {
-    _debugPrint('클랜 이름 랜덤 생성 중...');
+    _debugPrint('Generating random clan name...');
     
     setState(() {
       _isGeneratingName = true;
@@ -82,9 +82,9 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
         _nameController.text = clanName;
       });
       
-      _debugPrint('생성된 클랜 이름: $clanName');
+      _debugPrint('Generated clan name: $clanName');
     } catch (e) {
-      _debugPrint('클랜 이름 생성 오류: $e');
+      _debugPrint('Error generating clan name: $e');
     } finally {
       setState(() {
         _isGeneratingName = false;
@@ -102,7 +102,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
     
-    _debugPrint('클랜 생성 시도: $name');
+    _debugPrint('Attempting to create clan: $name');
     
     setState(() {
       _isLoading = true;
@@ -130,7 +130,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
       final updatedCharacter = widget.character.joinClan(newClan.id);
       await _dataService.updateCharacter(updatedCharacter);
       
-      _debugPrint('클랜 생성 완료: ${newClan.name} (ID: ${newClan.id})');
+      _debugPrint('Clan creation completed: ${newClan.name} (ID: ${newClan.id})');
       
       // 대시보드로 이동
       if (!mounted) return;
@@ -140,10 +140,10 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
         ),
       );
     } catch (e) {
-      _debugPrint('클랜 생성 오류: $e');
+      _debugPrint('Error creating clan: $e');
       
       setState(() {
-        _errorMessage = '클랜 생성 중 오류가 발생했습니다: $e';
+        _errorMessage = 'An error occurred while creating the clan: $e';
       });
     } finally {
       setState(() {
@@ -163,7 +163,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
     }
     
     final code = buffer.toString();
-    _debugPrint('초대 코드 생성: $code');
+    _debugPrint('Generated invite code: $code');
     return code;
   }
   
@@ -172,7 +172,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('새 클랜 창설'),
+        title: const Text('Create New Clan'),
         centerTitle: true,
       ),
       body: _isLoading
@@ -188,7 +188,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                     const Padding(
                       padding: EdgeInsets.only(bottom: 24.0),
                       child: Text(
-                        '당신만의 클랜을 창설하세요',
+                        'Create Your Own Clan',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -222,8 +222,8 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                           child: TextFormField(
                             controller: _nameController,
                             decoration: InputDecoration(
-                              labelText: '클랜 이름',
-                              hintText: '클랜의 이름을 입력하세요',
+                              labelText: 'Clan Name',
+                              hintText: 'Enter the name of your clan',
                               prefixIcon: const Icon(Icons.shield, color: AppTheme.primaryColor),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -231,10 +231,10 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return '클랜 이름을 입력해주세요';
+                                return 'Please enter a clan name';
                               }
                               if (value.length < 3) {
-                                return '클랜 이름은 최소 3글자 이상이어야 합니다';
+                                return 'Clan name must be at least 3 characters';
                               }
                               return null;
                             },
@@ -253,7 +253,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.autorenew),
-                          tooltip: '랜덤 이름 생성',
+                          tooltip: 'Generate Random Name',
                           color: AppTheme.primaryColor,
                         ),
                       ],
@@ -265,8 +265,8 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                     TextFormField(
                       controller: _descriptionController,
                       decoration: InputDecoration(
-                        labelText: '클랜 설명',
-                        hintText: '클랜에 대한 설명을 입력하세요',
+                        labelText: 'Clan Description',
+                        hintText: 'Enter a description for your clan',
                         prefixIcon: const Icon(Icons.description, color: AppTheme.primaryColor),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -275,10 +275,10 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                       maxLines: 3,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return '클랜 설명을 입력해주세요';
+                          return 'Please enter a clan description';
                         }
                         if (value.length < 10) {
-                          return '클랜 설명은 최소 10글자 이상이어야 합니다';
+                          return 'Clan description must be at least 10 characters';
                         }
                         return null;
                       },
@@ -288,8 +288,8 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                     
                     // 공개/비공개 설정
                     SwitchListTile(
-                      title: const Text('비공개 클랜'),
-                      subtitle: const Text('초대 코드로만 가입할 수 있습니다'),
+                      title: const Text('Private Clan'),
+                      subtitle: const Text('Can only be joined with an invite code'),
                       value: _isPrivate,
                       onChanged: (value) {
                         setState(() {
@@ -318,7 +318,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                         ),
                       ),
                       child: const Text(
-                        '클랜 창설하기',
+                        'Create Clan',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -331,7 +331,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                     // 취소 버튼
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('취소'),
+                      child: const Text('Cancel'),
                     ),
                   ],
                 ),

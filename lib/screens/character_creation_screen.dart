@@ -50,23 +50,23 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _debugPrint('Initializing...');
     
     // 기본값 설정
-    _nameController.text = '최창익';
+    _nameController.text = 'Hero Name';
     _generateBattleCry();
   }
   
   @override
   void dispose() {
     _nameController.dispose();
-    _debugPrint('리소스 해제됨');
+    _debugPrint('Resources released');
     super.dispose();
   }
   
   /// 전투 구호 생성
   void _generateBattleCry() {
-    _debugPrint('전투 구호 생성 중...');
+    _debugPrint('Generating battle cry...');
     setState(() {
       _isLoading = true;
     });
@@ -78,18 +78,18 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
       // 전투 구호 생성
       final battleCry = aiService.generateBattleCry(
         _selectedSpecialty, 
-        _nameController.text.isNotEmpty ? _nameController.text : '모험가',
+        _nameController.text.isNotEmpty ? _nameController.text : 'The Fixer',
       );
       
       setState(() {
         _battleCry = battleCry;
       });
     } catch (e) {
-      _debugPrint('전투 구호 생성 오류: $e');
+      _debugPrint('Battle cry generation error: $e');
       
       // 오류 발생 시 기본 전투 구호 설정
       setState(() {
-        _battleCry = '모험의 세계로 출발!';
+        _battleCry = "If it's broken, I'll fix it—or roast it!";
       });
     } finally {
       setState(() {
@@ -100,7 +100,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   
   /// 다음 단계로 이동
   void _nextStep() {
-    _debugPrint('다음 단계로 이동: ${_currentStep + 1}');
+    _debugPrint('Move to next step: ${_currentStep + 1}');
     
     if (_currentStep == 0) {
       // 1단계: 이름 및 역할 선택 검증
@@ -121,7 +121,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   
   /// 이전 단계로 이동
   void _prevStep() {
-    _debugPrint('이전 단계로 이동: ${_currentStep - 1}');
+    _debugPrint('Move to previous step: ${_currentStep - 1}');
     
     if (_currentStep > 0) {
       setState(() {
@@ -132,10 +132,10 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   
   /// 캐릭터 생성 완료
   Future<void> _createCharacter() async {
-    _debugPrint('캐릭터 생성 중...');
+    _debugPrint('Creating character...');
     
     if (!_formKey.currentState!.validate()) {
-      _debugPrint('폼 검증 실패');
+      _debugPrint('Form validation failed');
       return;
     }
     
@@ -157,7 +157,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
       
       // 캐릭터 저장
       await dataService.addCharacter(character);
-      _debugPrint('캐릭터 생성 완료: ${character.name}');
+      _debugPrint('Character creation completed: ${character.name}');
       
       // 클랜 선택 화면으로 이동
       if (!mounted) return;
@@ -168,11 +168,11 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
         ),
       );
     } catch (e) {
-      _debugPrint('캐릭터 생성 오류: $e');
+      _debugPrint('Character creation error: $e');
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('캐릭터 생성 중 오류가 발생했습니다: $e'),
+          content: Text('An error occurred during character creation: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -185,12 +185,12 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   
   @override
   Widget build(BuildContext context) {
-    _debugPrint('빌드 중...');
+    _debugPrint('Building...');
     
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('캐릭터 생성'),
+        title: const Text('Character Creation'),
         centerTitle: true,
       ),
       body: Form(
@@ -211,7 +211,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '단계 ${_currentStep + 1}/$_totalSteps: ',
+                    'Step ${_currentStep + 1}/$_totalSteps: ',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
@@ -258,7 +258,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                   },
                   icon: const Icon(Icons.psychology, color: AppTheme.secondaryColor),
                   label: const Text(
-                    'AI 설문으로 역할 추천받기',
+                    'Get Role Recommendation via AI Survey',
                     style: TextStyle(
                       color: AppTheme.secondaryColor,
                       fontWeight: FontWeight.bold,
@@ -285,7 +285,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                         backgroundColor: Colors.grey[300],
                         foregroundColor: Colors.black87,
                       ),
-                      child: const Text('이전'),
+                      child: const Text('Previous'),
                     )
                   else
                     const SizedBox(width: 80),
@@ -308,7 +308,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                           ),
                         )
                       : Text(
-                          _currentStep < _totalSteps - 1 ? '다음' : '완료',
+                          _currentStep < _totalSteps - 1 ? 'Next' : 'Complete',
                           style: const TextStyle(fontSize: 16),
                         ),
                   ),
@@ -325,11 +325,11 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
   String _getStepTitle(int step) {
     switch (step) {
       case 0:
-        return '기본 정보 입력';
+        return 'Basic Information';
       case 1:
-        return '전문 역할 선택';
+        return 'Specialty Selection';
       case 2:
-        return '전투 구호 확인';
+        return 'Battle Cry Confirmation';
       default:
         return '';
     }
@@ -355,14 +355,14 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '모험가의 이름을 알려주세요',
+          'Tell us your adventurer\'s name',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         
         const SizedBox(height: 8),
         
         Text(
-          '이 이름은 당신을 다른 모험가들과 구분하는 중요한 요소입니다.',
+          'This name is an important element that distinguishes you from other adventurers.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         
@@ -371,8 +371,8 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
         TextFormField(
           controller: _nameController,
           decoration: InputDecoration(
-            labelText: '캐릭터 이름',
-            hintText: '최창익',
+            labelText: 'Character Name',
+            hintText: 'Choi Chang-ik',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -380,7 +380,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return '캐릭터 이름을 입력해주세요';
+              return 'Please enter a character name';
             }
             return null;
           },
@@ -414,7 +414,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
         const SizedBox(height: 32),
         
         Text(
-          '모험을 떠날 준비가 되셨나요?',
+          'Are you ready to embark on an adventure?',
           style: Theme.of(context).textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -428,14 +428,14 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '당신의 전문 역할은 무엇인가요?',
+          'What is your specialty?',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         
         const SizedBox(height: 8),
         
         Text(
-          '당신의 성격과 능력을 가장 잘 반영하는 역할을 선택하세요.',
+          'Choose the role that best reflects your personality and abilities.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
 
@@ -454,7 +454,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '역할을 결정하기 어렵나요?',
+                        'Having a hard time deciding on a role?',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.secondaryColor,
@@ -465,7 +465,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '페이지 하단의 "AI 설문으로 역할 추천받기" 버튼을 눌러 설문에 답하면 AI가 당신에게 맞는 역할을 추천해 드립니다.',
+                  'Click the "Get Role Recommendation via AI Survey" button at the bottom of the page to answer a survey, and AI will recommend a role that suits you.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -599,14 +599,14 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '당신의 전투 구호',
+          'Your Battle Cry',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         
         const SizedBox(height: 8),
         
         Text(
-          '전투 구호는 당신의 결의와 의지를 보여주는 문구입니다.',
+          'A battle cry is a phrase that shows your determination and will.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         
@@ -673,7 +673,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
           child: ElevatedButton.icon(
             onPressed: _isLoading ? null : _generateBattleCry,
             icon: const Icon(Icons.refresh),
-            label: const Text('전투 구호 재생성'),
+            label: const Text('Regenerate Battle Cry'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.secondaryColor,
               foregroundColor: Colors.white,
@@ -702,7 +702,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
               const SizedBox(height: 8),
               
               Text(
-                '모든 설정이 완료되었습니다!',
+                'All settings are complete!',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -712,7 +712,7 @@ class _CharacterCreationScreenState extends State<CharacterCreationScreen> {
               const SizedBox(height: 8),
               
               Text(
-                '캐릭터 생성을 완료하고 모험을 시작하세요.',
+                'Complete character creation and start your adventure.',
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),

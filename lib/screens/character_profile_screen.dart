@@ -188,11 +188,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       final newBattleCry = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('전투 함성 변경'),
+          title: const Text('Change Battle Cry'),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(
-              hintText: '새로운 전투 함성을 입력하세요',
+              hintText: 'Enter a new battle cry',
               border: OutlineInputBorder(),
             ),
             maxLines: 2,
@@ -200,11 +200,11 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(null),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(controller.text),
-              child: const Text('저장'),
+              child: const Text('Save'),
             ),
           ],
         ),
@@ -228,7 +228,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('전투 함성이 변경되었습니다'),
+          content: Text('Battle cry changed'),
         ),
       );
       
@@ -240,7 +240,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('전투 함성 변경 중 오류가 발생했습니다: $e'),
+          content: Text('Error changing battle cry: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -254,21 +254,21 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('캐릭터 프로필'),
+        title: const Text('Character Profile'),
         centerTitle: true,
         actions: [
           // 새로고침 버튼
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadCharacterData,
-            tooltip: '새로고침',
+            tooltip: 'Refresh',
           ),
           
           // 로그아웃 버튼
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _handleLogout,
-            tooltip: '로그아웃',
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -361,15 +361,15 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
     final level = widget.character.level;
     String rank;
     if (level >= 20) {
-      rank = '전설적인 영웅';
+      rank = 'Legendary Hero';
     } else if (level >= 15) {
-      rank = '위대한 영웅';
+      rank = 'Great Hero';
     } else if (level >= 10) {
-      rank = '숙련된 모험가';
+      rank = 'Experienced Adventurer';
     } else if (level >= 5) {
-      rank = '유망한 모험가';
+      rank = 'Promising Adventurer';
     } else {
-      rank = '견습 모험가';
+      rank = 'Apprentice Adventurer';
     }
     
     // 다음 레벨까지 필요한 경험치 계산
@@ -583,7 +583,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '기본 정보',
+                    'Basic Information',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -598,17 +598,17 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                   const Divider(),
                   
                   // 이메일
-                  _buildInfoRow('이메일', widget.character.email),
+                  _buildInfoRow('Email', widget.character.email),
                   
                   const Divider(),
                   
                   // 생성일
-                  _buildInfoRow('가입일', widget.character.createdAt != null ? _formatDate(widget.character.createdAt!) : '정보 없음'),
+                  _buildInfoRow('Joined', widget.character.createdAt != null ? _formatDate(widget.character.createdAt!) : 'No information'),
                   
                   const Divider(),
                   
                   // 경험치
-                  _buildInfoRow('경험치', '${widget.character.experiencePoints} XP'),
+                  _buildInfoRow('Experience', '${widget.character.experiencePoints} XP'),
                 ],
               ),
             ),
@@ -628,7 +628,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '전문분야',
+                    'Specialty',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -709,7 +709,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
             const SizedBox(height: 16),
             
             const Text(
-              '습득한 스킬이 없습니다',
+              'No skills acquired',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -750,7 +750,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '스킬 요약',
+                    'Skill Summary',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -766,28 +766,28 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                       _buildSkillStatCard(
                         Icons.shield,
                         _calculateAverageSkillLevel(skillsByType[SkillType.combat]!),
-                        '전투',
+                        'Combat',
                         Colors.red.shade700,
                       ),
                       
                       _buildSkillStatCard(
                         Icons.auto_fix_high,
                         _calculateAverageSkillLevel(skillsByType[SkillType.knowledge]!),
-                        '지식',
+                        'Knowledge',
                         Colors.blue.shade700,
                       ),
                       
                       _buildSkillStatCard(
                         Icons.people,
                         _calculateAverageSkillLevel(skillsByType[SkillType.social]!),
-                        '사회',
+                        'Social',
                         Colors.green.shade700,
                       ),
                       
                       _buildSkillStatCard(
                         Icons.directions_walk,
                         _calculateAverageSkillLevel(skillsByType[SkillType.survival]!),
-                        '생존',
+                        'Survival',
                         Colors.orange.shade700,
                       ),
                     ],
@@ -828,22 +828,22 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
     
     switch (type) {
       case SkillType.combat:
-        title = '전투 스킬';
+        title = 'Combat Skills';
         color = Colors.red.shade700;
         icon = Icons.shield;
         break;
       case SkillType.knowledge:
-        title = '지식 스킬';
+        title = 'Knowledge Skills';
         color = Colors.blue.shade700;
         icon = Icons.auto_fix_high;
         break;
       case SkillType.social:
-        title = '사회적 스킬';
+        title = 'Social Skills';
         color = Colors.green.shade700;
         icon = Icons.people;
         break;
       case SkillType.survival:
-        title = '생존 스킬';
+        title = 'Survival Skills';
         color = Colors.orange.shade700;
         icon = Icons.directions_walk;
         break;
@@ -958,7 +958,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '다음 레벨',
+                            'Next Level',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -966,7 +966,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                           ),
                           
                           Text(
-                            '${skill.experienceToNextLevel} XP 남음',
+                            '${skill.experienceToNextLevel} XP left',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -995,9 +995,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 
                 // 다음 레벨 정보 (nextLevelName이 없으므로 제거)
                 Tooltip(
-                  message: '다음 레벨: ${skill.level + 1}',
+                  message: 'Next Level: ${skill.level + 1}',
                   child: Text(
-                    '다음 레벨: ${skill.level + 1}',
+                    'Next Level: ${skill.level + 1}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -1073,7 +1073,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 const SizedBox(height: 16),
                 
                 const Text(
-                  '아직 획득한 업적이 없습니다',
+                  'No achievements yet',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -1084,7 +1084,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 const SizedBox(height: 8),
                 
                 Text(
-                  '프로젝트의 미션을 완료하고 업적을 획득하세요!',
+                  'Complete missions in projects to earn achievements!',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -1186,7 +1186,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
   
   /// 날짜 포맷 반환
   String _formatDate(DateTime date) {
-    final formatter = DateFormat('yyyy년 MM월 dd일');
+    final formatter = DateFormat('yyyy/MM/dd');
     return formatter.format(date);
   }
   
@@ -1236,23 +1236,23 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
   String _getSpecialtyDescription(CharacterSpecialty specialty) {
     switch (specialty) {
       case CharacterSpecialty.warrior:
-        return '어려운 과제를 정면으로 맞서 해결합니다';
+        return 'Confronts and solves difficult tasks head-on';
       case CharacterSpecialty.mage:
-        return '창의적인 방법으로 문제를 해결합니다';
+        return 'Solves problems with creative methods';
       case CharacterSpecialty.healer:
-        return '팀의 사기를 높이고 문제를 중재합니다';
+        return 'Boosts team morale and mediates problems';
       case CharacterSpecialty.scout:
-        return '정보를 수집하고 미래를 예측합니다';
+        return 'Gathers information and predicts the future';
       case CharacterSpecialty.ranger:
-        return '야생을 탐험하고 정보를 수집합니다';
+        return 'Explores the wilderness and collects information';
       case CharacterSpecialty.rogue:
-        return '전투 중에 무작정 도망치거나 적을 속이는 기술을 사용합니다';
+        return 'Uses techniques to escape combat or deceive enemies';
       case CharacterSpecialty.cleric:
-        return '팀원들을 치유하고 성스러운 힘을 부여합니다';
+        return 'Heals team members and grants divine power';
       case CharacterSpecialty.leader:
-        return '클랜을 이끌고 방향성을 제시합니다';
+        return 'Leads the clan and provides direction';
       default:
-        return '다양한 능력으로 문제를 해결합니다';
+        return 'Solves problems with various abilities';
     }
   }
 } 

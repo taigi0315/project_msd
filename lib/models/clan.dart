@@ -65,7 +65,7 @@ class Clan {
     inviteCode = inviteCode ?? _generateInviteCode(),
     createdAt = createdAt ?? DateTime.now(),
     foundedAt = foundedAt ?? DateTime.now() {
-    _debugPrint('새로운 클랜 생성: $name (ID: $id)');
+    _debugPrint('New clan created: $name (ID: $id)');
   }
 
   /// 초대 코드 생성
@@ -73,59 +73,59 @@ class Clan {
     // UUID의 첫 6자리를 사용하여 초대 코드 생성
     String code = const Uuid().v4().substring(0, 6).toUpperCase();
     // ignore: avoid_print
-    print('🔑 새로운 초대 코드 생성: $code');
+    print('🔑 New invite code generated: $code');
     return code;
   }
 
   /// 새로운 초대 코드 생성
   void regenerateInviteCode() {
     inviteCode = _generateInviteCode();
-    _debugPrint('초대 코드 재생성됨: $inviteCode');
+    _debugPrint('Invite code regenerated: $inviteCode');
   }
 
   /// 클랜에 멤버 추가
   void addMember(String memberId) {
     if (!memberIds.contains(memberId)) {
       memberIds.add(memberId);
-      _debugPrint('멤버 추가됨: $memberId');
+      _debugPrint('Member added: $memberId');
     } else {
-      _debugPrint('멤버가 이미 존재함: $memberId');
+      _debugPrint('Member already exists: $memberId');
     }
   }
 
   /// 클랜에서 멤버 제거
   void removeMember(String memberId) {
     if (memberId == leaderId) {
-      _debugPrint('리더는 제거할 수 없습니다!');
+      _debugPrint('Cannot remove the leader!');
       return;
     }
     
     if (memberIds.contains(memberId)) {
       memberIds.remove(memberId);
-      _debugPrint('멤버 제거됨: $memberId');
+      _debugPrint('Member removed: $memberId');
     } else {
-      _debugPrint('멤버를 찾을 수 없음: $memberId');
+      _debugPrint('Member not found: $memberId');
     }
   }
 
   /// 클랜 리더 변경
   void changeLeader(String newLeaderId) {
     if (!memberIds.contains(newLeaderId)) {
-      _debugPrint('리더로 설정할 멤버가 클랜에 없습니다!');
+      _debugPrint('The member to set as leader is not in the clan!');
       return;
     }
     
     leaderId = newLeaderId;
-    _debugPrint('새 리더 설정됨: $newLeaderId');
+    _debugPrint('New leader set: $newLeaderId');
   }
 
   /// 새 프로젝트 추가
   void addProject(String projectId) {
     if (!projectIds.contains(projectId)) {
       projectIds.add(projectId);
-      _debugPrint('프로젝트 추가됨: $projectId');
+      _debugPrint('Project added: $projectId');
     } else {
-      _debugPrint('프로젝트가 이미 존재함: $projectId');
+      _debugPrint('Project already exists: $projectId');
     }
   }
 
@@ -133,9 +133,9 @@ class Clan {
   void removeProject(String projectId) {
     if (projectIds.contains(projectId)) {
       projectIds.remove(projectId);
-      _debugPrint('프로젝트 제거됨: $projectId');
+      _debugPrint('Project removed: $projectId');
     } else {
-      _debugPrint('프로젝트를 찾을 수 없음: $projectId');
+      _debugPrint('Project not found: $projectId');
     }
   }
 

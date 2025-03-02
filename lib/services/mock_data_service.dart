@@ -47,10 +47,10 @@ class MockDataService {
   
   /// 서비스 초기화
   Future<void> initialize() async {
-    _debugPrint('서비스 초기화 중...');
+    _debugPrint('Initializing service...');
     _prefs = await SharedPreferences.getInstance();
     await _loadAllData();
-    _debugPrint('데이터 로딩 완료');
+    _debugPrint('Data loading complete');
   }
   
   /// 모든 데이터 로드
@@ -62,7 +62,7 @@ class MockDataService {
   
   /// 캐릭터 데이터 로드
   Future<void> _loadCharacters() async {
-    _debugPrint('캐릭터 데이터 로딩 중...');
+    _debugPrint('Loading character data...');
     _characters.clear();
     
     final charactersJson = _prefs.getStringList('characters') ?? [];
@@ -72,17 +72,17 @@ class MockDataService {
         final character = Character.fromJson(data);
         _characters[character.id] = character;
       } catch (e) {
-        _debugPrint('캐릭터 데이터 파싱 오류: $e');
+        _debugPrint('Error parsing character data: $e');
       }
     }
     
     _characterStreamController.add(_characters);
-    _debugPrint('${_characters.length}개의 캐릭터 로딩됨');
+    _debugPrint('${_characters.length} characters loaded');
   }
   
   /// 클랜 데이터 로드
   Future<void> _loadClans() async {
-    _debugPrint('클랜 데이터 로딩 중...');
+    _debugPrint('Loading clan data...');
     _clans.clear();
     
     final clansJson = _prefs.getStringList('clans') ?? [];
@@ -92,17 +92,17 @@ class MockDataService {
         final clan = Clan.fromJson(data);
         _clans[clan.id] = clan;
       } catch (e) {
-        _debugPrint('클랜 데이터 파싱 오류: $e');
+        _debugPrint('Error parsing clan data: $e');
       }
     }
     
     _clanStreamController.add(_clans);
-    _debugPrint('${_clans.length}개의 클랜 로딩됨');
+    _debugPrint('${_clans.length} clans loaded');
   }
   
   /// 프로젝트 데이터 로드
   Future<void> _loadProjects() async {
-    _debugPrint('프로젝트 데이터 로딩 중...');
+    _debugPrint('Loading project data...');
     _projects.clear();
     
     final projectsJson = _prefs.getStringList('projects') ?? [];
@@ -112,12 +112,12 @@ class MockDataService {
         final project = Project.fromJson(data);
         _projects[project.id] = project;
       } catch (e) {
-        _debugPrint('프로젝트 데이터 파싱 오류: $e');
+        _debugPrint('Error parsing project data: $e');
       }
     }
     
     _projectStreamController.add(_projects);
-    _debugPrint('${_projects.length}개의 프로젝트 로딩됨');
+    _debugPrint('${_projects.length} projects loaded');
   }
   
   /// 모든 데이터 저장
@@ -129,39 +129,39 @@ class MockDataService {
   
   /// 캐릭터 데이터 저장
   Future<void> _saveCharacters() async {
-    _debugPrint('캐릭터 데이터 저장 중...');
+    _debugPrint('Saving character data...');
     final charactersJson = _characters.values.map((character) => 
       jsonEncode(character.toJson())).toList();
     
     await _prefs.setStringList('characters', charactersJson);
-    _debugPrint('${charactersJson.length}개의 캐릭터 저장됨');
+    _debugPrint('${charactersJson.length} characters saved');
   }
   
   /// 클랜 데이터 저장
   Future<void> _saveClans() async {
-    _debugPrint('클랜 데이터 저장 중...');
+    _debugPrint('Saving clan data...');
     final clansJson = _clans.values.map((clan) => 
       jsonEncode(clan.toJson())).toList();
     
     await _prefs.setStringList('clans', clansJson);
-    _debugPrint('${clansJson.length}개의 클랜 저장됨');
+    _debugPrint('${clansJson.length} clans saved');
   }
   
   /// 프로젝트 데이터 저장
   Future<void> _saveProjects() async {
-    _debugPrint('프로젝트 데이터 저장 중...');
+    _debugPrint('Saving project data...');
     final projectsJson = _projects.values.map((project) => 
       jsonEncode(project.toJson())).toList();
     
     await _prefs.setStringList('projects', projectsJson);
-    _debugPrint('${projectsJson.length}개의 프로젝트 저장됨');
+    _debugPrint('${projectsJson.length} projects saved');
   }
   
   // 캐릭터 관련 CRUD 메서드
   
   /// 새 캐릭터 추가
   Future<Character> addCharacter(Character character) async {
-    _debugPrint('새 캐릭터 추가: ${character.name}');
+    _debugPrint('Adding new character: ${character.name}');
     _characters[character.id] = character;
     _characterStreamController.add(_characters);
     await _saveCharacters();
@@ -170,7 +170,7 @@ class MockDataService {
   
   /// 캐릭터 수정
   Future<Character> updateCharacter(Character character) async {
-    _debugPrint('캐릭터 업데이트: ${character.name}');
+    _debugPrint('Updating character: ${character.name}');
     _characters[character.id] = character;
     _characterStreamController.add(_characters);
     await _saveCharacters();
@@ -179,7 +179,7 @@ class MockDataService {
   
   /// 캐릭터 제거
   Future<void> removeCharacter(String characterId) async {
-    _debugPrint('캐릭터 삭제: $characterId');
+    _debugPrint('Deleting character: $characterId');
     _characters.remove(characterId);
     _characterStreamController.add(_characters);
     await _saveCharacters();
@@ -195,7 +195,7 @@ class MockDataService {
     try {
       return _characters.values.firstWhere((character) => character.userId == userId);
     } catch (e) {
-      _debugPrint('사용자 ID로 캐릭터를 찾을 수 없음: $userId');
+      _debugPrint('Could not find character by user ID: $userId');
       return null;
     }
   }
@@ -209,7 +209,7 @@ class MockDataService {
   
   /// 새 클랜 추가
   Future<Clan> addClan(Clan clan) async {
-    _debugPrint('새 클랜 추가: ${clan.name}');
+    _debugPrint('Adding new clan: ${clan.name}');
     _clans[clan.id] = clan;
     _clanStreamController.add(_clans);
     await _saveClans();
@@ -218,7 +218,7 @@ class MockDataService {
   
   /// 클랜 수정
   Future<Clan> updateClan(Clan clan) async {
-    _debugPrint('클랜 업데이트: ${clan.name}');
+    _debugPrint('Updating clan: ${clan.name}');
     _clans[clan.id] = clan;
     _clanStreamController.add(_clans);
     await _saveClans();
@@ -227,7 +227,7 @@ class MockDataService {
   
   /// 클랜 제거
   Future<void> removeClan(String clanId) async {
-    _debugPrint('클랜 삭제: $clanId');
+    _debugPrint('Deleting clan: $clanId');
     _clans.remove(clanId);
     _clanStreamController.add(_clans);
     await _saveClans();
@@ -248,7 +248,7 @@ class MockDataService {
     try {
       return _clans.values.firstWhere((clan) => clan.inviteCode == inviteCode);
     } catch (e) {
-      _debugPrint('초대 코드로 클랜을 찾을 수 없음: $inviteCode');
+      _debugPrint('Could not find clan by invite code: $inviteCode');
       return null;
     }
   }
@@ -262,7 +262,7 @@ class MockDataService {
   
   /// 새 프로젝트 추가
   Future<Project> addProject(Project project) async {
-    _debugPrint('새 프로젝트 추가: ${project.name}');
+    _debugPrint('Adding new project: ${project.name}');
     _projects[project.id] = project;
     
     // 클랜에 프로젝트 연결
@@ -279,7 +279,7 @@ class MockDataService {
   
   /// 프로젝트 수정
   Future<Project> updateProject(Project project) async {
-    _debugPrint('프로젝트 업데이트: ${project.name}');
+    _debugPrint('Updating project: ${project.name}');
     _projects[project.id] = project;
     _projectStreamController.add(_projects);
     await _saveProjects();
@@ -288,7 +288,7 @@ class MockDataService {
   
   /// 프로젝트 제거
   Future<void> removeProject(String projectId) async {
-    _debugPrint('프로젝트 삭제: $projectId');
+    _debugPrint('Deleting project: $projectId');
     final project = _projects[projectId];
     
     if (project != null) {
@@ -329,13 +329,13 @@ class MockDataService {
   Future<void> updateMissionStatus(String projectId, String missionId, MissionStatus status) async {
     final project = _projects[projectId];
     if (project == null) {
-      _debugPrint('프로젝트를 찾을 수 없음: $projectId');
+      _debugPrint('Project not found: $projectId');
       return;
     }
     
     final missionIndex = project.missions.indexWhere((m) => m.id == missionId);
     if (missionIndex == -1) {
-      _debugPrint('미션을 찾을 수 없음: $missionId');
+      _debugPrint('Mission not found: $missionId');
       return;
     }
     
@@ -347,18 +347,18 @@ class MockDataService {
   void unlockAchievement(String projectId, String achievementId, String characterId) {
     final project = getProject(projectId);
     if (project == null) {
-      _debugPrint('프로젝트를 찾을 수 없음: $projectId');
+      _debugPrint('Project not found: $projectId');
       return;
     }
     
     final achievement = project.getAchievement(achievementId);
     if (achievement == null) {
-      _debugPrint('업적을 찾을 수 없음: $achievementId');
+      _debugPrint('Achievement not found: $achievementId');
       return;
     }
     
     if (achievement.isUnlocked) {
-      _debugPrint('이미 획득한 업적입니다');
+      _debugPrint('Achievement already unlocked');
       return;
     }
     
@@ -389,25 +389,25 @@ class MockDataService {
   /// 샘플 데이터 생성 (테스트용)
   Future<void> createSampleData() async {
     if (_characters.isNotEmpty || _clans.isNotEmpty || _projects.isNotEmpty) {
-      _debugPrint('샘플 데이터가 이미 존재합니다');
+      _debugPrint('Sample data already exists');
       return;
     }
     
-    _debugPrint('샘플 데이터 생성 중...');
+    _debugPrint('Creating sample data...');
     
     // 캐릭터 생성
     final character = Character(
-      name: '최용사',
+      name: 'Choi Warrior',
       userId: 'sample_user_id',
       specialty: CharacterSpecialty.warrior,
-      battleCry: '승리를 위하여!',
-      email: 'yongsa@choi.family'
+      battleCry: 'For victory!',
+      email: 'warrior@choi.family'
     );
     
     // 클랜 생성
     final clan = Clan(
-      name: '최씨 가문',
-      description: '최씨 가문의 위대한 업적을 기록하는 클랜입니다.',
+      name: 'Choi Family Clan',
+      description: 'A clan for recording the great achievements of the Choi family.',
       leaderId: character.id,
       founderCharacterId: character.id
     );
@@ -416,8 +416,8 @@ class MockDataService {
     
     // 프로젝트 생성
     final project = Project(
-      name: '가문 연대기 작성',
-      description: '최씨 가문의 역사와 업적을 기록하는 프로젝트입니다.',
+      name: 'Family Chronicles',
+      description: 'A project to record the history and achievements of the Choi family.',
       clanId: clan.id,
       creatorCharacterId: character.id,
       dueDate: DateTime.now().add(const Duration(days: 30)),
@@ -426,8 +426,8 @@ class MockDataService {
     // 미션 생성
     final mission1 = Mission(
       id: 'sample-mission-1',
-      name: '샘플 미션 1',
-      description: '샘플 미션 1 설명',
+      name: 'Sample Mission 1',
+      description: 'Description for Sample Mission 1',
       status: MissionStatus.todo,
       assignedToId: character.id,
       experienceReward: 100,
@@ -435,8 +435,8 @@ class MockDataService {
     
     final mission2 = Mission(
       id: 'sample-mission-2',
-      name: '샘플 미션 2',
-      description: '샘플 미션 2 설명',
+      name: 'Sample Mission 2',
+      description: 'Description for Sample Mission 2',
       status: MissionStatus.todo,
       assignedToId: character.id,
       experienceReward: 150,
@@ -444,8 +444,8 @@ class MockDataService {
     
     final mission3 = Mission(
       id: 'sample-mission-3',
-      name: '샘플 미션 3',
-      description: '샘플 미션 3 설명',
+      name: 'Sample Mission 3',
+      description: 'Description for Sample Mission 3',
       status: MissionStatus.todo,
       assignedToId: character.id,
       experienceReward: 200,
@@ -453,25 +453,25 @@ class MockDataService {
     
     // 업적 생성
     final achievement1 = Achievement(
-      name: '가문 역사가',
-      description: '최씨 가문의 역사를 연구하여 기록했습니다.',
-      condition: '모든 미션을 완료하세요',
+      name: 'Family Historian',
+      description: 'Researched and recorded the history of the Choi family.',
+      condition: 'Complete all missions',
       experienceReward: 500,
       tier: AchievementTier.gold,
     );
     
     final achievement2 = Achievement(
-      name: '가족 인터뷰어',
-      description: '가족 구성원들과의 인터뷰를 성공적으로 마쳤습니다.',
-      condition: '가족 인터뷰 미션을 완료하세요',
+      name: 'Family Interviewer',
+      description: 'Successfully completed interviews with family members.',
+      condition: 'Complete the family interview mission',
       experienceReward: 200,
       tier: AchievementTier.silver,
     );
     
     final achievement3 = Achievement(
-      name: '연대기 기록자',
-      description: '최씨 가문의 연대기 초안을 작성했습니다.',
-      condition: '연대기 초안을 작성하세요',
+      name: 'Chronicle Recorder',
+      description: 'Drafted the chronicles of the Choi family.',
+      condition: 'Write a draft of the chronicles',
       experienceReward: 300,
       tier: AchievementTier.silver,
     );
@@ -493,7 +493,7 @@ class MockDataService {
     clan.addProject(project.id);
     await updateClan(clan);
     
-    _debugPrint('샘플 데이터 생성 완료');
+    _debugPrint('Sample data creation completed');
   }
   
   /// 서비스 종료 처리
@@ -501,7 +501,7 @@ class MockDataService {
     _characterStreamController.close();
     _clanStreamController.close();
     _projectStreamController.close();
-    _debugPrint('서비스 종료됨');
+    _debugPrint('Service terminated');
   }
   
   /// 캐릭터 ID로 캐릭터 조회
@@ -513,7 +513,7 @@ class MockDataService {
   
   /// 캐릭터 데이터 내부 업데이트 메서드
   Future<void> _updateCharacterData(Character character) async {
-    _debugPrint('캐릭터 데이터 내부 업데이트: ${character.name}');
+    _debugPrint('Internal character data update: ${character.name}');
     _characters[character.id] = character;
     _characterStreamController.add(_characters);
     await _saveCharacters();
@@ -521,7 +521,7 @@ class MockDataService {
   
   /// 프로젝트 데이터 내부 업데이트 메서드
   Future<void> _updateProjectData(Project project) async {
-    _debugPrint('프로젝트 데이터 내부 업데이트: ${project.name}');
+    _debugPrint('Internal project data update: ${project.name}');
     _projects[project.id] = project;
     _projectStreamController.add(_projects);
     await _saveProjects();
@@ -529,27 +529,27 @@ class MockDataService {
   
   /// 로그아웃 처리
   Future<void> logout() async {
-    _debugPrint('로그아웃 처리 중...');
+    _debugPrint('Processing logout...');
     
     // 현재 사용자 정보 삭제 (실제 구현에서는 Firebase Auth를 사용)
     await _prefs.remove('currentUserId');
     
-    _debugPrint('로그아웃 완료');
+    _debugPrint('Logout completed');
   }
   
   /// 캐릭터에 경험치 추가
   Future<bool> gainCharacterExperience(String characterId, int amount, {BuildContext? context}) async {
-    _debugPrint('캐릭터 ID $characterId에 경험치 $amount 추가 시도');
+    _debugPrint('Attempting to add $amount experience to character ID $characterId');
     
     if (amount <= 0) {
-      _debugPrint('유효하지 않은 경험치 값: $amount');
+      _debugPrint('Invalid experience value: $amount');
       return false;
     }
     
     // 캐릭터 찾기
     final Character? character = await getCharacter(characterId);
     if (character == null) {
-      _debugPrint('캐릭터를 찾을 수 없음: $characterId');
+      _debugPrint('Character not found: $characterId');
       return false;
     }
     
@@ -559,13 +559,13 @@ class MockDataService {
     // 캐릭터 저장
     await _saveCharacter(character);
     
-    _debugPrint('캐릭터 ID $characterId에 경험치 $amount 추가 완료. 레벨업: $didLevelUp');
+    _debugPrint('Added $amount experience to character ID $characterId. Level up: $didLevelUp');
     return didLevelUp;
   }
   
   /// 캐릭터 저장
   Future<void> _saveCharacter(Character character) async {
-    _debugPrint('캐릭터 저장: ${character.name}');
+    _debugPrint('Saving character: ${character.name}');
     _characters[character.id] = character;
     _characterStreamController.add(_characters);
     await _saveCharacters();
@@ -573,7 +573,7 @@ class MockDataService {
   
   /// 사용자 로그인
   Future<dynamic> login(String email) async {
-    _debugPrint('로그인 시도: $email');
+    _debugPrint('Login attempt: $email');
     
     // 이메일로 사용자 찾기 (실제 Firebase 대신 모의 구현)
     await Future.delayed(Duration(milliseconds: 500)); // 네트워크 지연 시뮬레이션
@@ -584,11 +584,11 @@ class MockDataService {
         (character) => character.email == email,
       );
       
-      _debugPrint('기존 사용자 발견: ${existingCharacter.name}');
+      _debugPrint('Existing user found: ${existingCharacter.name}');
       return existingCharacter;
     } catch (e) {
       // 일치하는 캐릭터가 없을 경우
-      _debugPrint('새 사용자입니다. 캐릭터 생성이 필요합니다.');
+      _debugPrint('New user. Character creation required.');
       return null;
     }
   }
