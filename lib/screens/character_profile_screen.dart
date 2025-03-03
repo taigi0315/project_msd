@@ -107,12 +107,12 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
         _completedMissions = completedMissions;
       });
       
-      _debugPrint('캐릭터 데이터 로드 완료: ${achievements.length}개 업적, $_completedMissions개 미션');
+      _debugPrint('character data loaded: ${achievements.length} achievements, $_completedMissions missions');
     } catch (e) {
-      _debugPrint('데이터 로드 오류: $e');
+      _debugPrint('data loading error: $e');
       
       setState(() {
-        _errorMessage = '데이터를 불러오는 중 오류가 발생했습니다: $e';
+        _errorMessage = 'Error loading data: $e';
       });
     } finally {
       setState(() {
@@ -123,15 +123,15 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
   
   /// 로그아웃 처리
   Future<void> _handleLogout() async {
-    _debugPrint('로그아웃 시도');
+    _debugPrint('logout attempt');
     
     try {
       // 확인 다이얼로그
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('로그아웃'),
-          content: const Text('정말 로그아웃 하시겠습니까?'),
+          title: const Text('logout'),
+          content: const Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -146,7 +146,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       );
       
       if (confirmed != true) {
-        _debugPrint('로그아웃 취소됨');
+        _debugPrint('logout cancelled');
         return;
       }
       
@@ -156,7 +156,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       // 로그아웃 처리
       await dataService.logout();
       
-      _debugPrint('로그아웃 완료');
+      _debugPrint('logout completed');
       
       // 로그인 화면으로 이동
       if (!mounted) return;
@@ -165,7 +165,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
         (route) => false,
       );
     } catch (e) {
-      _debugPrint('로그아웃 오류: $e');
+      _debugPrint('logout error: $e');
       
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
@@ -222,7 +222,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       widget.character.battleCry = newBattleCry.trim();
       await dataService.updateCharacter(widget.character);
       
-      _debugPrint('전투 함성 변경 완료: $newBattleCry');
+      _debugPrint('battle cry changed: $newBattleCry');
       
       // 알림 표시
       if (!mounted) return;
@@ -235,7 +235,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
       // 화면 갱신
       setState(() {});
     } catch (e) {
-      _debugPrint('전투 함성 변경 오류: $e');
+      _debugPrint('battle cry change error: $e');
       
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
@@ -333,9 +333,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
             labelColor: AppTheme.primaryColor,
             unselectedLabelColor: Colors.grey,
             tabs: const [
-              Tab(text: '정보'),
-              Tab(text: '스킬'),
-              Tab(text: '업적'),
+              Tab(text: 'Information'),
+              Tab(text: 'Skills'),
+              Tab(text: 'Achievements'),
             ],
           ),
         ),
@@ -476,7 +476,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '경험치',
+                    'Experience',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -525,7 +525,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        '전투 함성',
+                        'Battle Cry',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -544,7 +544,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> with Si
                   
                   Text(
                     widget.character.battleCry.isEmpty 
-                        ? '(전투 함성을 입력하려면 클릭하세요)' 
+                        ? '(Click to enter a battle cry)' 
                         : '"${widget.character.battleCry}"',
                     style: TextStyle(
                       fontStyle: widget.character.battleCry.isEmpty

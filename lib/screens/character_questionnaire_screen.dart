@@ -5,6 +5,8 @@ import '../services/mock_data_service.dart';
 import '../services/openai_service.dart';
 import '../theme/app_theme.dart';
 import 'clan_selection_screen.dart';
+import '../services/game_effects_service.dart';
+import '../models/game_sound.dart';
 
 /// Character Questionnaire Screen
 /// This screen presents 7 fun questions to the user, collects their responses,
@@ -973,6 +975,9 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
       // Save character
       await dataService.addCharacter(character);
       _debugPrint('Character created: ${character.name}');
+      
+      // 캐릭터 생성 완료 시 효과음 재생
+      GameEffectsService().playSound(GameSound.swordClash);
       
       // Always navigate to clan selection screen
       if (!mounted) return;

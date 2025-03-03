@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:lottie/lottie.dart';
+import '../models/game_sound.dart';
 
 /// 게임 요소 효과를 관리하는 서비스
 /// 사운드 효과, 애니메이션 등을 처리합니다.
@@ -30,35 +31,45 @@ class GameEffectsService {
   
   /// 서비스 초기화
   Future<void> initialize() async {
-    _debugPrint('게임 효과 서비스 초기화 중...');
+    _debugPrint('Initializing game effects service...');
     
     try {
       // 오디오 플레이어 초기화
       await _audioPlayer.setReleaseMode(ReleaseMode.stop);
       
-      _debugPrint('게임 효과 서비스 초기화 완료');
+      _debugPrint('Game effects service initialized');
     } catch (e) {
-      _debugPrint('게임 효과 서비스 초기화 실패: $e');
+      _debugPrint('Game effects service initialization failed: $e');
       // 실패해도 앱은 계속 실행될 수 있도록 함
+    }
+  }
+  
+  /// 오디오 볼륨 설정
+  void setVolume(double volume) {
+    try {
+      _audioPlayer.setVolume(volume);
+      _debugPrint('Audio volume set to: $volume');
+    } catch (e) {
+      _debugPrint('Failed to set audio volume: $e');
     }
   }
   
   /// 사운드 효과 재생
   Future<void> playSound(GameSound sound) async {
     if (!soundEnabled) {
-      _debugPrint('사운드가 비활성화되어 있습니다.');
+      _debugPrint('Sound is disabled');
       return;
     }
     
     try {
-      _debugPrint('사운드 효과 재생: ${sound.name}');
+      _debugPrint('Playing sound: ${sound.name}');
       await _audioPlayer.stop();
       
       // 사운드 리소스 경로 매핑
       final String assetPath = _getSoundPath(sound);
       await _audioPlayer.play(AssetSource(assetPath));
     } catch (e) {
-      _debugPrint('사운드 효과 재생 실패: $e');
+      _debugPrint('Sound effect playback failed: $e');
     }
   }
   
@@ -101,7 +112,7 @@ class GameEffectsService {
     // 애니메이션 리소스 경로 매핑
     final String assetPath = _getAnimationPath(animation);
     
-    _debugPrint('애니메이션 생성: ${animation.name}');
+    _debugPrint('Creating animation: ${animation.name}');
     
     return Lottie.asset(
       assetPath,
@@ -110,7 +121,7 @@ class GameEffectsService {
       animate: true,
       repeat: false,
       onLoaded: (composition) {
-        _debugPrint('애니메이션 로드 완료: ${animation.name}');
+        _debugPrint('Animation loaded: ${animation.name}');
       },
       frameRate: FrameRate.max,
       delegates: LottieDelegates(
@@ -152,7 +163,7 @@ class GameEffectsService {
   void showXpGainEffect(BuildContext context, int amount) {
     if (!animationEnabled) return;
     
-    _debugPrint('XP 획득 효과 표시: +$amount XP');
+    _debugPrint('XP gain effect displayed: +$amount XP');
     
     // 사운드 효과 재생
     playSound(GameSound.xpGain);
@@ -222,7 +233,7 @@ class GameEffectsService {
   void showLevelUpEffect(BuildContext context, int newLevel) {
     if (!animationEnabled) return;
     
-    _debugPrint('레벨업 효과 표시: 레벨 $newLevel');
+    _debugPrint('Level up effect displayed: level $newLevel');
     
     // 사운드 효과 재생
     playSound(GameSound.levelUp);
@@ -262,7 +273,7 @@ class GameEffectsService {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
-                              '레벨 업!',
+                              'Level Up!',
                               style: TextStyle(
                                 color: Colors.amber,
                                 fontWeight: FontWeight.bold,
@@ -271,7 +282,7 @@ class GameEffectsService {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '축하합니다! 레벨 $newLevel 달성!',
+                              'Congratulations! Level $newLevel achieved!',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -303,7 +314,7 @@ class GameEffectsService {
   void showMissionCompleteEffect(BuildContext context) {
     if (!animationEnabled) return;
     
-    _debugPrint('미션 완료 효과 표시');
+    _debugPrint('Mission complete effect displayed');
     
     // 사운드 효과 재생
     playSound(GameSound.missionComplete);
@@ -339,7 +350,7 @@ class GameEffectsService {
   void showAchievementUnlockedEffect(BuildContext context, String achievementName) {
     if (!animationEnabled) return;
     
-    _debugPrint('업적 달성 효과 표시: $achievementName');
+    _debugPrint('Achievement unlocked effect displayed: $achievementName');
     
     // 사운드 효과 재생
     playSound(GameSound.achievementUnlocked);
@@ -385,7 +396,7 @@ class GameEffectsService {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Text(
-                                '업적 달성!',
+                                'Achievement Unlocked!',
                                 style: TextStyle(
                                   color: Colors.amber,
                                   fontWeight: FontWeight.bold,
@@ -425,76 +436,7 @@ class GameEffectsService {
   
   /// 리소스 해제
   void dispose() {
-    _debugPrint('게임 효과 서비스 리소스 해제');
+    _debugPrint('Game effects service resources released');
     _audioPlayer.dispose();
   }
-}
-
-/// 게임 사운드 효과 열거형
-enum GameSound {
-  /// 레벨업 사운드
-  levelUp,
-  
-  /// XP 획득 사운드
-  xpGain,
-  
-  /// 업적 획득 사운드
-  achievementUnlocked,
-  
-  /// 미션 완료 사운드
-  missionComplete,
-  
-  /// 버튼 클릭 사운드
-  buttonClick,
-  
-  /// 칼 부딪히는 사운드
-  swordClash,
-  
-  /// 작업 완료 사운드
-  taskComplete,
-  
-  /// 성공 사운드
-  success,
-  
-  /// 오류 사운드
-  error,
-}
-
-/// 게임 애니메이션 열거형
-enum GameAnimation {
-  /// 레벨업 애니메이션
-  levelUp,
-  
-  /// XP 획득 애니메이션
-  xpGain,
-  
-  /// 업적 획득 애니메이션
-  achievementUnlocked,
-  
-  /// 폭죽 애니메이션
-  confetti,
-  
-  /// 칼 휘두르는 애니메이션
-  swordSlash,
-  
-  /// 반짝임 애니메이션
-  sparkle,
-}
-
-/// 효과 이벤트 타입 열거형
-enum EffectEventType {
-  /// 레벨업
-  levelUp,
-  
-  /// XP 획득
-  xpGain,
-  
-  /// 업적 획득
-  achievementUnlocked,
-  
-  /// 미션 완료
-  missionComplete,
-  
-  /// 작업 완료
-  taskComplete,
 } 

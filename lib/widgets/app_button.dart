@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/game_effects_service.dart';
+import '../models/game_sound.dart';
 
 /// Super awesome button for our epic app!
 /// This reusable button component ensures consistent button styling across the app
@@ -56,7 +58,19 @@ class AppButton extends StatelessWidget {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading ? null : () {
+          if (onPressed != null) {
+            // 버튼 클릭 사운드 재생 (낮은 볼륨)
+            final gameEffects = GameEffectsService();
+            
+            // 볼륨 조절 메서드를 만들어 사용합니다
+            gameEffects.setVolume(0.3);
+            gameEffects.playSound(GameSound.buttonClick);
+            gameEffects.setVolume(1.0);
+            
+            onPressed!();
+          }
+        },
         style: ElevatedButton.styleFrom(
           foregroundColor: textColor,
           backgroundColor: backgroundColor,

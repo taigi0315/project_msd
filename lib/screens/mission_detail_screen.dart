@@ -25,6 +25,9 @@ import 'package:family_choi_app/theme/app_theme.dart';
       // 미션 완료 효과 표시
       GameEffectsService().showMissionCompleteEffect(context);
       
+      // 미션 완료 소리 재생
+      GameEffectsService().playSound(GameSound.missionComplete);
+      
       // XP 획득 효과 표시
       GameEffectsService().showXpGainEffect(context, xpAmount);
     }

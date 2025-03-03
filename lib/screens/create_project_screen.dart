@@ -9,6 +9,8 @@ import '../services/mock_ai_service.dart';
 import '../services/mock_data_service.dart';
 import '../services/openai_service.dart';
 import '../theme/app_theme.dart';
+import '../services/game_effects_service.dart';
+import '../models/game_sound.dart';
 
 /// 프로젝트 생성 화면
 /// 새로운 프로젝트를 생성하는 화면입니다.
@@ -424,6 +426,14 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
         final expReward = _achievements[0].experienceReward;
         widget.character.addExperience(expReward);
         _dataService.updateCharacter(widget.character);
+        
+        // 프로젝트 생성 효과음 재생
+        GameEffectsService().playSound(GameSound.swordClash);
+        
+        // XP 획득 효과 표시
+        if (context.mounted) {
+          GameEffectsService().showXpGainEffect(context, expReward);
+        }
         
         // 성공 메시지 표시 및 화면 닫기
         ScaffoldMessenger.of(context).showSnackBar(

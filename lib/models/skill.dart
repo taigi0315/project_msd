@@ -139,49 +139,49 @@ class Skill {
     return [
       // 전투 스킬
       Skill(
-        name: '전술적 사고',
-        description: '문제 상황에 전술적으로 접근하는 능력',
+        name: 'Strategic Thinking',
+        description: 'Ability to approach problem situations tactically',
         type: SkillType.combat,
       ),
       Skill(
-        name: '집중력',
-        description: '중요한 순간에 집중하는 능력',
+        name: 'Concentration',
+        description: 'Ability to focus on important moments',
         type: SkillType.combat,
       ),
       
       // 지식 스킬
       Skill(
-        name: '역사 지식',
-        description: '가족의 역사와 이야기에 대한 지식',
+        name: 'Historical Knowledge',
+        description: 'Knowledge of family history and stories',
         type: SkillType.knowledge,
       ),
       Skill(
-        name: '분석적 사고',
-        description: '복잡한 정보를 분석하는 능력',
+        name: 'Analytical Thinking',
+        description: 'Ability to analyze complex information',
         type: SkillType.knowledge,
       ),
       
       // 사회적 스킬
       Skill(
-        name: '의사소통',
-        description: '명확하고 효과적으로 소통하는 능력',
+        name: 'Communication',
+        description: 'Ability to communicate clearly and effectively',
         type: SkillType.social,
       ),
       Skill(
-        name: '공감 능력',
-        description: '다른 사람의 입장을 이해하는 능력',
+        name: 'Empathy',
+        description: 'Ability to understand and relate to others',
         type: SkillType.social,
       ),
       
       // 생존 스킬
       Skill(
-        name: '스트레스 관리',
-        description: '스트레스 상황에서도 평정을 유지하는 능력',
+        name: 'Stress Management',
+        description: 'Ability to maintain composure in stressful situations',
         type: SkillType.survival,
       ),
       Skill(
-        name: '적응력',
-        description: '변화하는 환경에 빠르게 적응하는 능력',
+        name: 'Adaptability',
+        description: 'Ability to adapt quickly to changing environments',
         type: SkillType.survival,
       ),
     ];

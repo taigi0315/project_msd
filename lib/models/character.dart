@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:family_choi_app/services/game_effects_service.dart';
+import 'package:family_choi_app/models/game_sound.dart';
 import 'skill.dart';
 
 /// Character specialty roles in our epic RPG adventure!
