@@ -37,7 +37,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
   @override
   void initState() {
     super.initState();
-    _debugPrint('초기화 중...');
+    _debugPrint('Initializing...');
     
     // 멤버 목록 로드
     _loadMembers();
@@ -45,7 +45,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
   
   /// 멤버 데이터 로드
   Future<void> _loadMembers() async {
-    _debugPrint('멤버 데이터 로드 중...');
+    _debugPrint('Loading member data...');
     
     setState(() {
       _isLoading = true;
@@ -72,12 +72,12 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
         _members = members;
       });
       
-      _debugPrint('${members.length}명의 멤버 로드됨');
+      _debugPrint('${members.length} members loaded');
     } catch (e) {
-      _debugPrint('멤버 로드 오류: $e');
+      _debugPrint('Member loading error: $e');
       
       setState(() {
-        _errorMessage = '멤버 정보를 불러오는 중 오류가 발생했습니다: $e';
+        _errorMessage = 'Error loading members: $e';
       });
     } finally {
       setState(() {
@@ -93,30 +93,30 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       return;
     }
     
-    _debugPrint('멤버 제거 시도: ${member.name}');
+    _debugPrint('Member removal attempt: ${member.name}');
     
     try {
       // 확인 다이얼로그
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('멤버 제거'),
-          content: Text('정말로 ${member.name}님을 클랜에서 제거하시겠습니까?'),
+          title: const Text('Member Removal'),
+          content: Text('Are you sure you want to remove ${member.name} from the clan?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('제거', style: TextStyle(color: Colors.red)),
+              child: const Text('Remove', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),
       );
       
       if (confirmed != true) {
-        _debugPrint('멤버 제거 취소됨');
+        _debugPrint('Member removal cancelled');
         return;
       }
       
@@ -131,7 +131,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       member.leaveClan();
       await dataService.updateCharacter(member);
       
-      _debugPrint('멤버 제거 완료: ${member.name}');
+      _debugPrint('Member removal complete: ${member.name}');
       
       // 화면 갱신
       setState(() {
@@ -142,16 +142,16 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${member.name}님이 클랜에서 제거되었습니다'),
+          content: Text('${member.name} removed from clan'),
         ),
       );
     } catch (e) {
-      _debugPrint('멤버 제거 오류: $e');
+      _debugPrint('Member removal error: $e');
       
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('멤버 제거 중 오류가 발생했습니다: $e'),
+          content: Text('Member removal error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -160,15 +160,15 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
   
   /// 초대 코드 공유
   void _shareInviteCode() {
-    _debugPrint('초대 코드 공유: ${widget.clan.inviteCode}');
+    _debugPrint('Invite code sharing: ${widget.clan.inviteCode}');
     
     // 실제 앱에서는 플랫폼별 공유 기능 사용
     // 여기서는 간단히 스낵바로 표시
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('초대 코드가 복사되었습니다: ${widget.clan.inviteCode}'),
+        content: Text('Invite code copied: ${widget.clan.inviteCode}'),
         action: SnackBarAction(
-          label: '공유',
+          label: 'Share',
           onPressed: () {
             // 실제 공유 기능 구현
           },
@@ -184,30 +184,30 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       return;
     }
     
-    _debugPrint('초대 코드 재생성 시도');
+    _debugPrint('Invite code regeneration attempt');
     
     try {
       // 확인 다이얼로그
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('초대 코드 재생성'),
-          content: const Text('새로운 초대 코드를 생성하면 이전 코드는 만료됩니다. 계속하시겠습니까?'),
+          title: const Text('Invite Code Regeneration'),
+          content: const Text('Creating a new invite code will expire the previous code. Continue?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('재생성'),
+              child: const Text('Regenerate'),
             ),
           ],
         ),
       );
       
       if (confirmed != true) {
-        _debugPrint('초대 코드 재생성 취소됨');
+        _debugPrint('Invite code regeneration cancelled');
         return;
       }
       
@@ -221,25 +221,25 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       // 저장
       await dataService.updateClan(widget.clan);
       
-      _debugPrint('초대 코드 재생성 완료: $newCode');
+      _debugPrint('Invite code regeneration complete: $newCode');
       
       // 알림 표시
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('새 초대 코드가 생성되었습니다: $newCode'),
+          content: Text('New invite code generated: $newCode'),
         ),
       );
       
       // 화면 갱신 (상태가 변경된 것은 아니지만 빌드를 다시 실행)
       setState(() {});
     } catch (e) {
-      _debugPrint('초대 코드 재생성 오류: $e');
+      _debugPrint('Invite code regeneration error: $e');
       
       // 에러 알림
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('초대 코드 재생성 중 오류가 발생했습니다: $e'),
+          content: Text('Invite code regeneration error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -265,14 +265,14 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('${widget.clan.name} 멤버'),
+        title: Text('${widget.clan.name} Members'),
         centerTitle: true,
         actions: [
           // 새로고침 버튼
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadMembers,
-            tooltip: '새로고침',
+            tooltip: 'Refresh',
           ),
         ],
       ),
@@ -293,7 +293,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '클랜 멤버 (${_members.length})',
+                        'Clan Members (${_members.length})',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -301,7 +301,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                       ),
                       
                       Text(
-                        '창설자: ${_getFounderName()}',
+                        'Founder: ${_getFounderName()}',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -333,7 +333,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                   child: _members.isEmpty
                       ? const Center(
                           child: Text(
-                            '멤버가 없습니다',
+                            'No members',
                             style: TextStyle(
                               fontSize: 16,
                               fontStyle: FontStyle.italic,
@@ -365,7 +365,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '친구 초대하기',
+            'Invite Friends',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -375,7 +375,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
           const SizedBox(height: 8),
           
           const Text(
-            '아래 코드를 공유하여 친구를 클랜에 초대하세요',
+            'Share the code below to invite friends to the clan',
             style: TextStyle(fontSize: 14),
           ),
           
@@ -409,7 +409,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                     IconButton(
                       icon: const Icon(Icons.copy),
                       onPressed: _shareInviteCode,
-                      tooltip: '복사',
+                      tooltip: 'Copy',
                       color: AppTheme.primaryColor,
                     ),
                     
@@ -418,7 +418,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
                       IconButton(
                         icon: const Icon(Icons.refresh),
                         onPressed: _regenerateInviteCode,
-                        tooltip: '코드 재생성',
+                        tooltip: 'Regenerate Code',
                         color: AppTheme.secondaryColor,
                       ),
                   ],
@@ -548,7 +548,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
               IconButton(
                 icon: const Icon(Icons.person_remove, color: Colors.red),
                 onPressed: () => _removeMember(member),
-                tooltip: '멤버 제거',
+                tooltip: 'Remove Member',
               ),
           ],
         ),
@@ -562,7 +562,7 @@ class _ClanMembersScreenState extends State<ClanMembersScreen> {
       (member) => member.id == widget.clan.founderCharacterId,
       orElse: () => Character(
         id: '',
-        name: '알 수 없음',
+        name: 'Unknown',
         userId: 'unknown',
         specialty: CharacterSpecialty.warrior,
         battleCry: '',

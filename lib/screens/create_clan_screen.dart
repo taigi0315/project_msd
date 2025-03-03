@@ -446,9 +446,9 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                helperText: 'Max 25 characters',
+                                helperText: 'Max 50 characters',
                               ),
-                              maxLength: 25,
+                              maxLength: 50,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Please enter a clan name';
@@ -821,7 +821,7 @@ class _CreateClanScreenState extends State<CreateClanScreen> {
                             label: Text(_isEditingDescription ? 'Done' : 'Edit'),
                             style: TextButton.styleFrom(
                               foregroundColor: AppTheme.primaryColor,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             ),
                           ),
                         ],

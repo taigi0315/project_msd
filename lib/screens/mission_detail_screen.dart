@@ -36,7 +36,7 @@ import 'package:family_choi_app/theme/app_theme.dart';
     
     // 사용자에게 메시지 표시
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('미션을 성공적으로 완료했습니다!'))
+      SnackBar(content: Text('Mission completed successfully!'))
     );
 
     // 미션 상세 화면 닫기 (이전 화면으로 돌아가기)

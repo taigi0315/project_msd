@@ -158,7 +158,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       tutorialManager.showFeatureTutorial(
         context: context,
         featureKey: 'project_detail_tabs',
-        message: '탭을 사용하여 프로젝트의 미션, 업적, 정보를 확인할 수 있습니다.',
+        message: 'Use the tabs to view the project\'s missions, achievements, and information.',
         targetKey: _tabsKey,
       );
     }
@@ -166,7 +166,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   
   /// 미션 상태 업데이트
   Future<void> _updateMissionStatus(app_mission.Mission mission, app_mission.MissionStatus newStatus) async {
-    _debugPrint('미션 상태 업데이트: ${mission.name} -> $newStatus');
+    _debugPrint('Mission status updated: ${mission.name} -> $newStatus');
     
     try {
       final dataService = Provider.of<MockDataService>(context, listen: false);
@@ -193,7 +193,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('미션 완료! +${mission.experienceReward} XP 획득!'),
+              content: Text('Mission completed! +${mission.experienceReward} XP received!'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
             ),
@@ -209,12 +209,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         });
       }
     } catch (e) {
-      _debugPrint('미션 상태 업데이트 오류: $e');
+      _debugPrint('Mission status update error: $e');
       
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('미션 상태 업데이트 중 오류가 발생했습니다: $e'),
+          content: Text('Mission status update error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -223,7 +223,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   
   /// 미션 할당 대화상자 표시
   Future<void> _showAssignMissionDialog(app_mission.Mission mission) async {
-    _debugPrint('미션 할당 대화상자 표시');
+    _debugPrint('Mission assignment dialog displayed');
     
     try {
       final dataService = Provider.of<MockDataService>(context, listen: false);
@@ -243,7 +243,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('미션 할당'),
+          title: const Text('Mission Assignment'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -272,7 +272,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
@@ -298,24 +298,24 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('미션 할당 저장 중 오류가 발생했습니다: $e'),
+                      content: Text('Mission assignment save error: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               },
-              child: const Text('저장'),
+              child: const Text('Save'),
             ),
           ],
         ),
       );
     } catch (e) {
-      _debugPrint('미션 할당 대화상자 오류: $e');
+      _debugPrint('Mission assignment dialog error: $e');
       
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('미션 할당 처리 중 오류가 발생했습니다: $e'),
+          content: Text('Mission assignment processing error: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -324,7 +324,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   
   /// 미션 삭제
   Future<void> _deleteMission(app_mission.Mission mission) async {
-    _debugPrint('미션 삭제: ${mission.name}');
+    _debugPrint('Mission deletion: ${mission.name}');
     
     try {
       // 삭제 확인 대화상자
@@ -332,16 +332,16 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('미션 삭제 확인'),
-          content: Text('정말로 "${mission.name}" 미션을 삭제하시겠습니까?'),
+          title: const Text('Mission Delete Confirmation'),
+          content: Text('Are you sure you want to delete "${mission.name}" mission?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('취소'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('삭제', style: TextStyle(color: Colors.red)),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -366,17 +366,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('미션이 삭제되었습니다'),
+          content: Text('Mission deleted successfully'),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
-      _debugPrint('미션 삭제 오류: $e');
+      _debugPrint('Mission deletion error: $e');
       
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('미션 삭제 중 오류가 발생했습니다: $e'),
+          content: Text('Error deleting mission: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -385,7 +385,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   
   /// 새 미션 추가 대화상자
   Future<void> _showAddMissionDialog() async {
-    _debugPrint('새 미션 추가 대화상자 표시');
+    _debugPrint('New mission addition dialog displayed');
     
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController();
@@ -397,7 +397,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('새 미션 추가'),
+        title: const Text('Add New Mission'),
         content: Form(
           key: formKey,
           child: SingleChildScrollView(
@@ -407,12 +407,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                 TextFormField(
                   controller: nameController,
                   decoration: const InputDecoration(
-                    labelText: '미션 이름',
-                    hintText: '미션의 이름을 입력하세요',
+                    labelText: 'Mission Name',
+                    hintText: 'Enter the name of the mission',
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '미션 이름을 입력해주세요';
+                      return 'Please enter a mission name';
                     }
                     return null;
                   },
@@ -421,13 +421,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                 TextFormField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
-                    labelText: '미션 설명',
-                    hintText: '미션에 대한 설명을 입력하세요',
+                    labelText: 'Mission Description',
+                    hintText: 'Enter the description of the mission',
                   ),
                   maxLines: 3,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '미션 설명을 입력해주세요';
+                      return 'Please enter a mission description';
                     }
                     return null;
                   },
@@ -436,17 +436,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                 TextFormField(
                   controller: experienceController,
                   decoration: const InputDecoration(
-                    labelText: '경험치 보상',
-                    hintText: '미션 완료 시 획득할 경험치',
+                    labelText: 'Experience Reward',
+                    hintText: 'Experience reward for completing the mission',
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return '경험치 보상을 입력해주세요';
+                      return 'Please enter an experience reward';
                     }
                     final exp = int.tryParse(value);
                     if (exp == null || exp <= 0) {
-                      return '유효한 경험치 값을 입력해주세요';
+                      return 'Please enter a valid experience value';
                     }
                     return null;
                   },
@@ -458,7 +458,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
@@ -510,24 +510,24 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('새 미션이 추가되었습니다'),
+                      content: Text('New mission added successfully'),
                       backgroundColor: Colors.green,
                     ),
                   );
                 } catch (e) {
-                  _debugPrint('미션 추가 오류: $e');
+                  _debugPrint('Mission addition error: $e');
                   
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('미션 추가 중 오류가 발생했습니다: $e'),
+                      content: Text('Error adding mission: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               }
             },
-            child: const Text('추가'),
+            child: const Text('Add'),
           ),
         ],
       ),
@@ -538,7 +538,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
         tutorialManager.showFeatureTutorial(
           context: context,
           featureKey: 'mission_added',
-          message: '미션을 추가했습니다! 미션을 완료하면 경험치를 얻을 수 있습니다.',
+          message: 'Mission added! Complete the mission to gain experience.',
           targetKey: _tabsKey,
         );
       }
@@ -549,7 +549,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   Future<void> _generateAdditionalMissions() async {
     if (_project == null) return;
     
-    _debugPrint('AI로 추가 미션 생성 중...');
+    _debugPrint('Generating additional missions with AI...');
     
     setState(() {
       _isGeneratingMissions = true;
@@ -618,11 +618,11 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${newMissions.length}개의 새로운 미션이 생성되었습니다'),
+          content: Text('${newMissions.length} new missions generated'),
         ),
       );
     } catch (e) {
-      _debugPrint('미션 생성 오류: $e');
+      _debugPrint('Mission creation error: $e');
       
       setState(() {
         _isGeneratingMissions = false;
@@ -631,7 +631,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('미션 생성 중 오류가 발생했습니다: $e'),
+          content: Text('Error generating missions: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -643,7 +643,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
       tutorialManager.showFeatureTutorial(
         context: context,
         featureKey: 'ai_mission_generated',
-        message: 'AI가 미션을 생성했습니다! 이제 이 미션들을 완료하여 경험치를 얻을 수 있습니다.',
+        message: 'AI has generated missions! Complete them to gain experience.',
         targetKey: _generateMissionsKey,
       );
     }
@@ -654,7 +654,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text(_project?.name ?? '프로젝트 상세'),
+        title: Text(_project?.name ?? 'Project Details'),
         centerTitle: true,
         actions: [
           // OpenAI 스위치
@@ -670,7 +670,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                   
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(_useOpenAI ? 'OpenAI API 사용' : '목업 데이터 사용'),
+                      content: Text(_useOpenAI ? 'Using OpenAI API' : 'Using Mock Data'),
                       duration: const Duration(seconds: 1),
                     ),
                   );
@@ -683,9 +683,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
           key: _tabsKey,
           controller: _tabController,
           tabs: const [
-            Tab(text: '개요', icon: Icon(Icons.info_outline)),
-            Tab(text: '미션', icon: Icon(Icons.task_alt)),
-            Tab(text: '멤버', icon: Icon(Icons.group)),
+            Tab(text: 'Overview', icon: Icon(Icons.info_outline)),
+            Tab(text: 'Missions', icon: Icon(Icons.task_alt)),
+            Tab(text: 'Members', icon: Icon(Icons.group)),
           ],
         ),
       ),
@@ -726,7 +726,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
           ? FloatingActionButton(
               onPressed: _showAddMissionDialog,
               child: const Icon(Icons.add),
-              tooltip: '새 미션 추가',
+              tooltip: 'Add New Mission',
             )
           : null,
     );
@@ -735,7 +735,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   /// 개요 탭 위젯
   Widget _buildOverviewTab() {
     if (_project == null) {
-      return const Center(child: Text('프로젝트 정보를 불러올 수 없습니다'));
+      return const Center(child: Text('Project information cannot be loaded'));
     }
     
     final completedMissions = _project!.missions.where((m) => m.status == app_mission.MissionStatus.completed).length;
@@ -1060,12 +1060,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
               ),
               if (isAssigned)
                 const Tooltip(
-                  message: '나에게 할당됨',
+                  message: 'Assigned to me',
                   child: Icon(Icons.person, size: 16, color: AppTheme.secondaryColor),
                 ),
             ],
           ),
-          subtitle: Text('보상: ${mission.experienceReward} XP'),
+          subtitle: Text('Reward: ${mission.experienceReward} XP'),
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1084,7 +1084,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                         child: DropdownButtonFormField<app_mission.MissionStatus>(
                           value: mission.status,
                           decoration: const InputDecoration(
-                            labelText: '상태',
+                            labelText: 'Status',
                             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                           items: app_mission.MissionStatus.values.map((status) {
@@ -1117,14 +1117,14 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
                       if (_isCharacterOwner)
                         IconButton(
                           icon: const Icon(Icons.person_add),
-                          tooltip: '멤버 할당',
+                          tooltip: 'Assign Member',
                           onPressed: () => _showAssignMissionDialog(mission),
                         ),
                       // 삭제 버튼
                       if (_isCharacterOwner)
                         IconButton(
                           icon: const Icon(Icons.delete),
-                          tooltip: '미션 삭제',
+                          tooltip: 'Delete Mission',
                           color: Colors.red,
                           onPressed: () => _deleteMission(mission),
                         ),
@@ -1198,7 +1198,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> with SingleTi
   
   /// 날짜 포맷
   String _formatDate(DateTime date) {
-    return '${date.year}년 ${date.month}월 ${date.day}일';
+    return '${date.year}y ${date.month}m ${date.day}d';
   }
   
   /// 프로젝트 상태 텍스트 반환

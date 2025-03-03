@@ -178,7 +178,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
       });
       
       // Show D&D character confirmation dialog
-      _showDnDCharacterDialog(dndCharacterData);
+      _showCharacterDialog(dndCharacterData);
       
     } catch (e) {
       _debugPrint('Character generation error: $e');
@@ -272,7 +272,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
   }
   
   /// D&D character confirmation dialog
-  void _showDnDCharacterDialog(Map<String, dynamic> characterData) {
+  void _showCharacterDialog(Map<String, dynamic> characterData) {
     // Save D&D character data
     _dndCharacterData = characterData;
     
@@ -281,22 +281,406 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
       barrierDismissible: false,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
         ),
-        child: SingleChildScrollView(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF2A3A65),
+                Color(0xFF14213D),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black38,
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Sparkling effects at top
+                  SizedBox(
+                    height: 50,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(Icons.auto_awesome, color: Colors.amber, size: 28),
+                        Positioned(
+                          left: 50,
+                          top: 10,
+                          child: Icon(Icons.star, color: Colors.amberAccent, size: 18),
+                        ),
+                        Positioned(
+                          right: 60,
+                          top: 5,
+                          child: Icon(Icons.star, color: Colors.amber[200], size: 14),
+                        ),
+                        Positioned(
+                          right: 40,
+                          bottom: 10,
+                          child: Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Header
+                  Center(
+                    child: Text(
+                      'BEHOLD! YOUR HERO IS BORN!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                        letterSpacing: 1.2,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black,
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 30),
+                  
+                  // Character class & specialty
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.primaryColor.withOpacity(0.4),
+                          AppTheme.primaryColor.withOpacity(0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AppTheme.primaryColor.withOpacity(0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // Character class icon based on class name
+                        _buildClassIcon(characterData['class_name']),
+                        
+                        const SizedBox(height: 12),
+                        
+                        Text(
+                          characterData['class_name'].toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          characterData['specialty'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Skills header with icon
+                  Row(
+                    children: [
+                      Icon(Icons.psychology, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Text(
+                        'EPIC SKILLS',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Skills list
+                  ...List.generate(
+                    (characterData['skills'] as List).length,
+                    (index) => Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppTheme.secondaryColor,
+                                Color(0xFFF3B02D),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.secondaryColor.withOpacity(0.4),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          characterData['skills'][index],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Battle cry
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFFC9912E).withOpacity(0.4),
+                          Color(0xFFE2A82F).withOpacity(0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: AppTheme.secondaryColor.withOpacity(0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.record_voice_over, color: AppTheme.secondaryColor),
+                            const SizedBox(width: 8),
+                            Text(
+                              'BATTLE CRY',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.secondaryColor,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "${characterData['battle_cry']}",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 30),
+                  
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Start over
+                          _pageController.animateToPage(
+                            0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                          setState(() {
+                            _currentIndex = 0;
+                            for (var controller in _controllers) {
+                              controller.clear();
+                            }
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.white60),
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          'RETRY',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 16),
+                      
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          // Go to character confirmation dialog
+                          _showConfirmationDialog();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          elevation: 8,
+                          shadowColor: AppTheme.primaryColor.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'CONTINUE',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(Icons.arrow_forward, size: 18),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  /// Character save confirmation dialog
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF2A3A65),
+                Color(0xFF14213D),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black38,
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header
+                // Header with icon
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.emoji_events,
+                      size: 36,
+                      color: Colors.amber,
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Title
                 Center(
                   child: Text(
-                    'BEHOLD! Your Hero is Born!',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    'YOUR CHARACTER IS READY!',
+                    style: TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryColor,
+                      color: Colors.amber,
+                      letterSpacing: 1.2,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -304,96 +688,131 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
                 
                 const SizedBox(height: 24),
                 
-                // Character class & specialty
+                // Character details in stylized cards
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.primaryColor),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        characterData['class_name'],
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        characterData['specialty'],
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Skills list
-                Text(
-                  'Epic Skills',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                ...List.generate(
-                  (characterData['skills'] as List).length,
-                  (index) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: AppTheme.secondaryColor,
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        characterData['skills'][index],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white24,
+                      width: 1,
                     ),
                   ),
+                  child: Column(
+                    children: [
+                      // Name
+                      Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.amber, size: 22),
+                          SizedBox(width: 10),
+                          Text(
+                            'NAME:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _characterName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      Divider(color: Colors.white12, height: 24),
+                      
+                      // Role
+                      Row(
+                        children: [
+                          Icon(Icons.style, color: Colors.amber, size: 22),
+                          SizedBox(width: 10),
+                          Text(
+                            'ROLE:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _characterSpecialty.displayName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      Divider(color: Colors.white12, height: 24),
+                      
+                      // Battle Cry
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.record_voice_over, color: Colors.amber, size: 22),
+                          SizedBox(width: 10),
+                          Text(
+                            'BATTLE CRY:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.amber.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          "$_battleCry",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.white,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 
                 const SizedBox(height: 24),
                 
-                // Battle cry
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.amber[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.secondaryColor),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Battle Cry',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.secondaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        characterData['battle_cry'],
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                // Message
+                Center(
+                  child: Text(
+                    'Ready to begin your epic adventure?',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.8),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 
@@ -403,6 +822,7 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Start Over button
                     OutlinedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
@@ -420,24 +840,53 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
                         });
                       },
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppTheme.primaryColor),
+                        side: BorderSide(color: Colors.white60),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                      child: const Text('Retry'),
+                      child: Text(
+                        'START OVER',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     
                     const SizedBox(width: 16),
                     
+                    // Begin Adventure button
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        // Go to character confirmation dialog
-                        _showConfirmationDialog();
+                        _saveCharacterAndNavigate();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        elevation: 8,
+                        shadowColor: AppTheme.primaryColor.withOpacity(0.6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                      child: const Text('Continue'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'BEGIN ADVENTURE',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.map, size: 18),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -449,57 +898,49 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
     );
   }
   
-  /// Character save confirmation dialog
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Your Character is Ready!'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Name: $_characterName', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Role: ${_characterSpecialty.displayName}'),
-            const SizedBox(height: 8),
-            Text('Battle Cry: "$_battleCry"'),
-            const SizedBox(height: 16),
-            const Text('Ready to begin your adventure with this character?'),
-          ],
+  // 캐릭터 클래스에 기반한 아이콘 생성
+  Widget _buildClassIcon(String className) {
+    IconData iconData;
+    Color iconColor;
+    
+    // 클래스 이름에 따라 적절한 아이콘 선택
+    final lowerClassName = className.toLowerCase();
+    if (lowerClassName.contains('wizard') || lowerClassName.contains('mage')) {
+      iconData = Icons.auto_fix_high;
+      iconColor = Colors.lightBlue;
+    } else if (lowerClassName.contains('warrior') || lowerClassName.contains('fighter')) {
+      iconData = Icons.security;
+      iconColor = Colors.redAccent;
+    } else if (lowerClassName.contains('rogue') || lowerClassName.contains('thief')) {
+      iconData = Icons.flash_on;
+      iconColor = Colors.purpleAccent;
+    } else if (lowerClassName.contains('ranger') || lowerClassName.contains('hunter')) {
+      iconData = Icons.track_changes;
+      iconColor = Colors.green;
+    } else if (lowerClassName.contains('cleric') || lowerClassName.contains('priest')) {
+      iconData = Icons.healing;
+      iconColor = Colors.amber;
+    } else if (lowerClassName.contains('bard') || lowerClassName.contains('singer')) {
+      iconData = Icons.music_note;
+      iconColor = Colors.pinkAccent;
+    } else {
+      iconData = Icons.stars;
+      iconColor = Colors.amber;
+    }
+    
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Icon(
+          iconData,
+          size: 36,
+          color: iconColor,
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Start over
-              _pageController.animateToPage(
-                0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-              setState(() {
-                _currentIndex = 0;
-                for (var controller in _controllers) {
-                  controller.clear();
-                }
-              });
-            },
-            child: const Text('Start Over'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _saveCharacterAndNavigate();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Begin Adventure!'),
-          ),
-        ],
       ),
     );
   }
@@ -561,110 +1002,232 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Character'),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Progress indicator
-                LinearProgressIndicator(
-                  value: (_currentIndex + 1) / _questions.length,
-                  backgroundColor: Colors.grey[200],
-                  color: AppTheme.primaryColor,
-                  minHeight: 10,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Question counter
-                Center(
-                  child: Text(
-                    'Question ${_currentIndex + 1} of ${_questions.length}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Question pages
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _questions.length,
-                    itemBuilder: (context, index) {
-                      return _buildQuestionPage(index);
-                    },
-                  ),
-                ),
-                
-                // Navigation buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Previous button (if not on first page)
-                    if (_currentIndex > 0)
-                      OutlinedButton.icon(
-                        onPressed: _prevQuestion,
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Previous'),
-                      )
-                    else
-                      const SizedBox(width: 100),
-                      
-                    // Next/Complete button
-                    ElevatedButton.icon(
-                      onPressed: _nextQuestion,
-                      icon: Icon(_currentIndex < _questions.length - 1 
-                          ? Icons.arrow_forward 
-                          : Icons.check_circle_outline),
-                      label: Text(_currentIndex < _questions.length - 1 
-                          ? 'Next' 
-                          : 'Complete'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        title: const Text(
+          'CHARACTER CREATION',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+            fontSize: 18,
           ),
-          
-          // Loading overlay
-          if (_isGeneratingCharacter)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.grey[100]!,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Progress container
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Creating Your Character...\nRolling the dice! 🎲',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    child: Column(
+                      children: [
+                        // Progress bar
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: (_currentIndex + 1) / _questions.length,
+                            backgroundColor: Colors.grey[200],
+                            color: AppTheme.primaryColor,
+                            minHeight: 12,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 12),
+                        
+                        // Progress text
+                        Text(
+                          '${_currentIndex + 1} of ${_questions.length} Questions',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Question pages
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
+                      padding: const EdgeInsets.all(20),
+                      child: PageView.builder(
+                        controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _questions.length,
+                        itemBuilder: (context, index) {
+                          return _buildQuestionPage(index);
+                        },
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Navigation buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Previous button (if not on first page)
+                      if (_currentIndex > 0)
+                        ElevatedButton.icon(
+                          onPressed: _prevQuestion,
+                          icon: const Icon(Icons.arrow_back, size: 18),
+                          label: const Text(
+                            'PREVIOUS',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: AppTheme.primaryColor,
+                            backgroundColor: Colors.white,
+                            elevation: 4,
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 100),
+                        
+                      // Next/Complete button
+                      ElevatedButton.icon(
+                        onPressed: _nextQuestion,
+                        icon: Icon(
+                          _currentIndex < _questions.length - 1 
+                              ? Icons.arrow_forward 
+                              : Icons.check_circle_outline,
+                          size: 18,
+                        ),
+                        label: Text(
+                          _currentIndex < _questions.length - 1 
+                              ? 'NEXT' 
+                              : 'COMPLETE',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 8,
+                          shadowColor: AppTheme.primaryColor.withOpacity(0.5),
+                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-        ],
+            
+            // Loading overlay
+            if (_isGeneratingCharacter)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF14213D),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 15,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                            strokeWidth: 3,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Creating Your Character...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Rolling the dice! 🎲',
+                          style: TextStyle(
+                            color: Colors.amber,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -677,92 +1240,191 @@ class _CharacterQuestionnaireScreenState extends State<CharacterQuestionnaireScr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Question text
-          Text(
-            question.question,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
+          // Question number badge
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppTheme.primaryColor, Color(0xFF3D5EA4)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                'QUESTION ${index + 1}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 1.0,
+                ),
+              ),
             ),
           ),
           
           const SizedBox(height: 16),
           
+          // Question text
+          Text(
+            question.question,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryColor,
+              height: 1.3,
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
           // Guidance
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor.withOpacity(0.15),
+                  AppTheme.primaryColor.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppTheme.primaryColor.withOpacity(0.2),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.lightbulb_outline, 
-                      color: AppTheme.secondaryColor),
-                    const SizedBox(width: 8),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.secondaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.lightbulb_outline, 
+                        color: AppTheme.secondaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Text(
-                      'Guidance:',
+                      'GUIDANCE:',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.secondaryColor,
+                        fontSize: 16,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(question.guidance),
+                const SizedBox(height: 12),
+                Text(
+                  question.guidance,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black87,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
           // Example
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
+              color: Colors.amber.withOpacity(0.07),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.amber.withOpacity(0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.emoji_objects_outlined, color: Colors.orange),
-                    SizedBox(width: 8),
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.emoji_objects_outlined, 
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Text(
-                      'Example:',
+                      'EXAMPLE:',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange,
+                        fontSize: 16,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(question.example),
+                const SizedBox(height: 12),
+                Text(
+                  question.example,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.black87,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: 30),
           
           // Input field
           TextField(
             controller: _controllers[index],
             maxLines: 5,
+            style: TextStyle(fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Type your answer here...',
+              hintStyle: TextStyle(color: Colors.grey[400]),
               filled: true,
               fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: AppTheme.primaryColor,
+                  width: 2,
+                ),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                ),
+              ),
+              contentPadding: EdgeInsets.all(16),
             ),
           ),
         ],

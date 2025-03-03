@@ -678,7 +678,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
                                 ),
                                 title: Text(achievement.name),
                                 subtitle: Text(
-                                  '${achievement.description}\n조건: ${achievement.condition}',
+                                  '${achievement.description}\nCondition: ${achievement.condition}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -949,15 +949,15 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   String _getAchievementTierName(AchievementTier tier) {
     switch (tier) {
       case AchievementTier.bronze:
-        return '브론즈';
+        return 'bronze';
       case AchievementTier.silver:
-        return '실버';
+        return 'silver';
       case AchievementTier.gold:
-        return '골드';
+        return 'gold';
       case AchievementTier.platinum:
-        return '플래티넘';
+        return 'platinum';
       case AchievementTier.diamond:
-        return '다이아몬드';
+        return 'diamond';
     }
   }
 }

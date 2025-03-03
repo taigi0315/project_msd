@@ -13,8 +13,8 @@ import 'package:family_choi_app/screens/splash_screen.dart';
 import 'package:family_choi_app/theme/app_theme.dart';
 
 void main() {
-  testWidgets('앱 시작 화면이 성공적으로 로드되는지 확인', (WidgetTester tester) async {
-    // 앱을 빌드하고 프레임 트리거
+  testWidgets('App starts successfully', (WidgetTester tester) async {
+    // Build the app and trigger a frame
     await tester.pumpWidget(const FamilyChoiApp());
 
     // 스플래시 화면이 로드되었는지 확인
@@ -28,8 +28,8 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
   
-  testWidgets('앱 테마가 올바르게 적용되는지 확인', (WidgetTester tester) async {
-    // 앱을 빌드하고 프레임 트리거
+  testWidgets('App theme is applied correctly', (WidgetTester tester) async {
+    // Build the app and trigger a frame
     await tester.pumpWidget(const FamilyChoiApp());
     
     // 테마 색상이 올바르게 적용되었는지 확인

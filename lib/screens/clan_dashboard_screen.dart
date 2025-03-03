@@ -308,7 +308,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '프로젝트 (${_projects.length})',
+                    'Projects (${_projects.length})',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -321,7 +321,7 @@ class _ClanDashboardScreenState extends State<ClanDashboardScreen> {
                     onPressed: () {
                       // 정렬 기능 (차후 구현)
                     },
-                    tooltip: '정렬',
+                    tooltip: 'Sort',
                   ),
                 ],
               ),
